@@ -2,9 +2,8 @@ import { motion } from "framer-motion";
 import { User } from "lucide-react";
 
 const members = [
-  { name: "Arnav", role: "Lead Developer" },
-  { name: "Parth Dhanker", role: "ML Researcher" },
-  { name: "Aman Rathore", role: "Data Architect" },
+  { name: "Arnav Bhatt", role: "Frontend Development" },
+  { name: "Parth Dhanker", role: "Backend Development" },
 ];
 
 const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number];

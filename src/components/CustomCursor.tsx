@@ -6,6 +6,8 @@ const CustomCursor = () => {
   const y = useMotionValue(-100);
   const opacity = useMotionValue(0);
   const scale = useMotionValue(1);
+  const springX = useSpring(x, { stiffness: 800, damping: 35 });
+  const springY = useSpring(y, { stiffness: 800, damping: 35 });
   const springScale = useSpring(scale, { stiffness: 500, damping: 28 });
 
   useEffect(() => {
@@ -19,14 +21,12 @@ const CustomCursor = () => {
       y.set(e.clientY);
       opacity.set(1);
     };
-
-    const down = () => scale.set(0.6);
+    const down = () => scale.set(0.7);
     const up = () => scale.set(1);
-
     const over = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest("a, button, [role='button'], input, textarea, select, label, [data-clickable]")) {
-        scale.set(2.5);
+        scale.set(3);
       }
     };
     const out = () => scale.set(1);
@@ -57,8 +57,8 @@ const CustomCursor = () => {
     <motion.div
       className="pointer-events-none fixed top-0 left-0 z-[9999] w-2 h-2 rounded-full bg-primary mix-blend-difference"
       style={{
-        x,
-        y,
+        x: springX,
+        y: springY,
         opacity,
         scale: springScale,
         translateX: "-50%",

@@ -10,17 +10,17 @@ const AnimatedStat = ({ value, suffix, prefix, label, sublabel, delay }: {
   return (
     <motion.div
       ref={ref as React.Ref<HTMLDivElement>}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay, ease }}
-      className="text-center glass rounded-3xl p-8"
+      transition={{ duration: 0.6, delay, ease }}
+      className="text-center glass-card rounded-3xl p-10"
     >
-      <p className="text-4xl sm:text-5xl font-extrabold tracking-[-0.05em] text-gradient-hero mb-3">
+      <p className="text-5xl sm:text-6xl font-extrabold tracking-[-0.05em] text-gradient-hero mb-4">
         {prefix}{count.toLocaleString()}{suffix}
       </p>
-      <p className="text-[14px] font-medium text-foreground/80 mb-1 tracking-[-0.01em]">{label}</p>
-      <p className="text-[11px] text-muted-foreground/60 font-light">{sublabel}</p>
+      <p className="text-base font-medium text-foreground/80 mb-1.5 tracking-[-0.01em]">{label}</p>
+      <p className="text-sm text-muted-foreground/50 font-light">{sublabel}</p>
     </motion.div>
   );
 };
@@ -34,12 +34,12 @@ const stats = [
 
 const StatsSection = () => {
   return (
-    <section className="py-28 relative">
+    <section className="py-32 relative">
       <div className="absolute inset-0 bg-radial-hero opacity-30" />
       <div className="container mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {stats.map((stat, i) => (
-            <AnimatedStat key={stat.label} {...stat} delay={i * 0.08} />
+            <AnimatedStat key={stat.label} {...stat} delay={i * 0.1} />
           ))}
         </div>
       </div>

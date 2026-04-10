@@ -13,26 +13,26 @@ const techStack = [
 
 const SocialProofSection = () => {
   return (
-    <section className="py-16 relative border-y border-border/10">
+    <section className="py-20 relative border-y border-foreground/[0.04]">
       <div className="container mx-auto px-6">
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, ease }}
-          className="text-center text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground/50 mb-10"
+          transition={{ duration: 0.6, ease }}
+          className="text-center text-xs font-medium uppercase tracking-[0.25em] text-muted-foreground/40 mb-12"
         >
           Built with industry-standard tools
         </motion.p>
-        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+        <div className="flex flex-wrap items-center justify-center gap-x-14 gap-y-8">
           {techStack.map((item, i) => (
             <motion.div
               key={item.name}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.06, ease }}
-              className="text-xl sm:text-2xl font-bold tracking-[0.1em] text-muted-foreground/20 hover:text-muted-foreground/40 transition-colors duration-300 select-none"
+              transition={{ duration: 0.5, delay: i * 0.07, ease }}
+              className="text-2xl sm:text-3xl font-bold tracking-[0.08em] text-muted-foreground/15 hover:text-muted-foreground/35 transition-colors duration-500 select-none"
             >
               {item.name}
             </motion.div>

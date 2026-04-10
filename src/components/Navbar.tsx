@@ -5,10 +5,10 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
-  { label: "Colorizer", href: "#colorizer" },
+  { label: "Features", href: "#colorizer" },
   { label: "Research", href: "/research" },
   { label: "Pricing", href: "/pricing" },
-  { label: "Dashboard", href: "/dashboard" },
+  { label: "API Docs", href: "/docs" },
 ];
 
 const Navbar = () => {
@@ -60,7 +60,7 @@ const Navbar = () => {
 
           <div className="hidden md:flex items-center gap-3">
             {user ? (
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="glow" size="sm" asChild>
                 <a href="/dashboard">Open App</a>
               </Button>
             ) : (
@@ -68,8 +68,8 @@ const Navbar = () => {
                 <Button variant="ghost" size="sm" asChild>
                   <a href="/auth">Sign In</a>
                 </Button>
-                <Button variant="default" size="sm" asChild>
-                  <a href="/auth">Get Started</a>
+                <Button variant="glow" size="sm" asChild>
+                  <a href="/auth">Get Started Free</a>
                 </Button>
               </>
             )}
@@ -92,12 +92,12 @@ const Navbar = () => {
               ))}
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: navLinks.length * 0.06 }} className="mt-4 flex gap-3">
                 {user ? (
-                  <Button variant="default" size="lg" asChild onClick={() => setMobileOpen(false)}>
+                  <Button variant="glow" size="lg" asChild onClick={() => setMobileOpen(false)}>
                     <a href="/dashboard">Open App</a>
                   </Button>
                 ) : (
-                  <Button variant="default" size="lg" asChild onClick={() => setMobileOpen(false)}>
-                    <a href="/auth">Sign In</a>
+                  <Button variant="glow" size="lg" asChild onClick={() => setMobileOpen(false)}>
+                    <a href="/auth">Get Started Free</a>
                   </Button>
                 )}
               </motion.div>

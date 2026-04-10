@@ -31,13 +31,24 @@ const SettingsPage = () => {
       setOrganization("");
     };
 
+    const sanitizeDisplayName = (value: string | null | undefined, currentEmail: string | null | undefined) => {
+      const trimmedValue = value?.trim() ?? "";
+      const trimmedEmail = currentEmail?.trim().toLowerCase() ?? "";
+
+      if (!trimmedValue) return "";
+      if (trimmedEmail && trimmedValue.toLowerCase() === trimmedEmail) return "";
+
+      return trimmedValue;
+    };
+
     const loadProfile = async () => {
       if (!user) {
         resetProfileFields();
         return;
       }
 
-      setEmail(user.email ?? "");
+      const userEmail = user.email ?? "";
+      setEmail(userEmail);
       setDisplayName("");
       setOrganization("");
 
@@ -54,8 +65,8 @@ const SettingsPage = () => {
         return;
       }
 
-      setDisplayName(data?.display_name ?? "");
-      setOrganization(data?.bio ?? "");
+      setDisplayName(sanitizeDisplayName(data?.display_name, userEmail));
+      setOrganization(data?.bio?.trim() ?? "");
     };
 
     void loadProfile();
@@ -74,8 +85,11 @@ const SettingsPage = () => {
     setSaving(true);
 
     try {
+      const userEmail = user.email?.trim().toLowerCase() ?? "";
       const cleanDisplayName = displayName.trim();
       const cleanOrganization = organization.trim();
+      const normalizedDisplayName =
+        userEmail && cleanDisplayName.toLowerCase() === userEmail ? null : cleanDisplayName || null;
 
       const { data: existingProfile, error: existingProfileError } = await supabase
         .from("profiles")
@@ -91,13 +105,13 @@ const SettingsPage = () => {
         ? await supabase
             .from("profiles")
             .update({
-              display_name: cleanDisplayName || null,
+              display_name: normalizedDisplayName,
               bio: cleanOrganization || null,
             })
             .eq("user_id", user.id)
         : await supabase.from("profiles").insert({
             user_id: user.id,
-            display_name: cleanDisplayName || null,
+            display_name: normalizedDisplayName,
             bio: cleanOrganization || null,
           });
 
@@ -105,6 +119,8 @@ const SettingsPage = () => {
         throw writeResult.error;
       }
 
+      setDisplayName(normalizedDisplayName ?? "");
+      setOrganization(cleanOrganization);
       toast.success("Settings saved");
     } catch {
       toast.error("Failed to save changes");

@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MagneticWrap } from "./MicroInteractions";
+import { Link } from "react-router-dom";
 
 const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number];
 
@@ -26,7 +28,7 @@ const CTASection = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8"
           >
             <Sparkles size={14} className="text-primary" />
-            <span className="text-xs font-medium text-muted-foreground">Start free — no credit card required</span>
+            <span className="text-xs font-medium text-muted-foreground">Free to use — open research project</span>
           </motion.div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[-0.04em] mb-6">
@@ -34,18 +36,20 @@ const CTASection = () => {
             <span className="text-gradient-hero">full color?</span>
           </h2>
           <p className="text-base text-muted-foreground max-w-md mx-auto mb-10 leading-relaxed">
-            Join thousands of researchers and analysts using SARChroma to unlock insights hidden in radar imagery.
+            Try SARChroma and see how GAN-based colorization transforms raw radar imagery into interpretable visuals.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button variant="glow" size="lg" className="group" asChild>
-              <a href="/auth">
-                Get Started Free
-                <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-              </a>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <a href="/pricing">View Pricing</a>
+            <MagneticWrap>
+              <Button variant="glow" size="lg" className="group press" asChild>
+                <Link to="/auth">
+                  Get Started
+                  <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+                </Link>
+              </Button>
+            </MagneticWrap>
+            <Button variant="outline" size="lg" className="press" asChild>
+              <Link to="/research">Learn More</Link>
             </Button>
           </div>
         </motion.div>

@@ -93,8 +93,8 @@ const Gallery = () => {
             <div className="p-4">
               <p className="text-sm font-semibold tracking-[-0.01em]">{item.name}</p>
               <div className="flex items-center justify-between mt-1.5">
-                <p className="text-[11px] text-muted-foreground">{item.date}</p>
-                <span className="text-[10px] font-medium text-primary/80 bg-primary/10 px-2 py-0.5 rounded-full">{item.source}</span>
+                <p className="text-xs text-muted-foreground">{item.date}</p>
+                <span className="text-xs font-medium text-primary/80 bg-primary/10 px-2 py-0.5 rounded-full">{item.source}</span>
               </div>
             </div>
           </motion.div>

@@ -69,7 +69,7 @@ export function AppSidebar() {
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/50 font-medium">
+          <SidebarGroupLabel className="text-xs uppercase tracking-[0.1em] text-muted-foreground/50 font-medium">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -78,7 +78,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/50 font-medium">
+          <SidebarGroupLabel className="text-xs uppercase tracking-[0.1em] text-muted-foreground/50 font-medium">
             Resources
           </SidebarGroupLabel>
           <SidebarGroupContent>

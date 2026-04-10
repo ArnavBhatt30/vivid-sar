@@ -133,7 +133,7 @@ const Dashboard = () => {
               </div>
             </div>
             <p className="text-2xl font-bold tracking-[-0.03em]">{stat.value}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">{stat.label}</p>
           </motion.div>
         ))}
       </div>
@@ -206,7 +206,7 @@ const Dashboard = () => {
               <Inbox size={24} className="text-muted-foreground/50" />
             </div>
             <p className="text-sm font-medium text-muted-foreground">No colorizations yet</p>
-            <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs">
+            <p className="text-sm text-muted-foreground/60 mt-1 max-w-xs">
               Upload a SAR image to get started — your results will appear here.
             </p>
           </div>
@@ -226,13 +226,13 @@ const Dashboard = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{item.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{relativeTime(item.date)}</p>
+                    <p className="text-xs text-muted-foreground">{relativeTime(item.date)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
-                  <span className="text-xs text-muted-foreground hidden sm:block">{item.resolution}</span>
+                   <span className="text-sm text-muted-foreground hidden sm:block">{item.resolution}</span>
                   <span
-                    className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
+                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                       item.status === "Complete"
                         ? "text-emerald-400 bg-emerald-400/10"
                         : item.status === "Processing"

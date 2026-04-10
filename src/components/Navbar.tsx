@@ -37,8 +37,8 @@ const Navbar = () => {
         transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-apple ${
           scrolled || mobileOpen
-            ? "bg-background/50 backdrop-blur-3xl border-b border-foreground/[0.04]"
-            : "bg-transparent"
+            ? "bg-background/60 backdrop-blur-3xl border-b border-foreground/[0.06] shadow-sm"
+            : "bg-background/30 backdrop-blur-2xl"
         }`}
       >
         <nav className="container mx-auto flex h-[4.5rem] items-center justify-between px-6">

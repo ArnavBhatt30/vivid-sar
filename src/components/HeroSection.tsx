@@ -55,7 +55,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.9, delay: 0.25, ease }}
-            className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-16 leading-[1.65] font-light"
+            className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 sm:mb-16 leading-[1.65] font-light"
           >
             Transform monochrome SAR satellite imagery into photorealistic RGB
             using GAN-based deep learning — revealing what radar sees but eyes cannot.

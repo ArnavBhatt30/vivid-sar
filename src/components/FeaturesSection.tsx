@@ -69,7 +69,7 @@ const FeaturesSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: i * 0.08, ease }}
-                className="group glass-card rounded-3xl p-8 hover:glass-elevated transition-all duration-500 cursor-default h-full"
+                className="group glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-8 hover:glass-elevated transition-all duration-500 cursor-default h-full"
               >
                 <div className="w-14 h-14 rounded-2xl glass-elevated flex items-center justify-center mb-6 group-hover:scale-110 group-hover:glow-sm transition-all duration-400">
                   <f.icon size={22} className="text-primary/70 group-hover:text-primary transition-colors duration-300" />

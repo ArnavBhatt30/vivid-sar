@@ -1,15 +1,19 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Check, Radar } from "lucide-react";
+import { Upload, Check, Radar, MapPin, Globe, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type Phase = "idle" | "scanning" | "processing" | "complete";
 
-const ease = [0.25, 0.1, 0.25, 1] as const;
+const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number];
 
 const UploadSection = () => {
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
+  const [showCoordInput, setShowCoordInput] = useState(false);
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   const startUpload = () => {
@@ -37,6 +41,37 @@ const UploadSection = () => {
     }, 2000);
   };
 
+  const handleCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported by your browser");
+      return;
+    }
+    toast.info("Fetching your location...");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        toast.success(
+          `Location acquired: ${pos.coords.latitude.toFixed(4)}°, ${pos.coords.longitude.toFixed(4)}°`
+        );
+      },
+      () => {
+        toast.error("Unable to retrieve location");
+      }
+    );
+  };
+
+  const handleCoordSubmit = () => {
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    if (isNaN(latNum) || isNaN(lngNum) || latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
+      toast.error("Please enter valid coordinates");
+      return;
+    }
+    toast.success(`Segmenting at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
+    setShowCoordInput(false);
+    setLat("");
+    setLng("");
+  };
+
   return (
     <section className="py-28 relative bg-mesh">
       <div className="container mx-auto px-6">
@@ -62,8 +97,8 @@ const UploadSection = () => {
           transition={{ duration: 0.7, ease }}
           className="max-w-lg mx-auto"
         >
+          {/* Upload card */}
           <div className="glass-elevated rounded-2xl p-8 sm:p-10 text-center relative overflow-hidden">
-            {/* Dotted border */}
             <div className="absolute inset-4 rounded-xl border border-dashed border-border/40 pointer-events-none" />
 
             <AnimatePresence mode="wait">
@@ -101,14 +136,12 @@ const UploadSection = () => {
                   className="relative z-10 py-6"
                 >
                   <div className="w-20 h-20 mx-auto relative mb-5">
-                    {/* Radar scanner */}
                     <div className="absolute inset-0 rounded-full border border-primary/20" />
                     <div className="absolute inset-2 rounded-full border border-primary/15" />
                     <div className="absolute inset-4 rounded-full border border-primary/10" />
                     <div className="absolute inset-0 animate-scan-rotate">
                       <div className="w-1/2 h-px bg-gradient-to-r from-primary to-transparent absolute top-1/2 left-1/2 origin-left" />
                     </div>
-                    {/* Pulse rings */}
                     <div className="absolute inset-0 rounded-full border border-primary/30 animate-ring-expand" />
                     <div className="absolute inset-0 rounded-full border border-primary/20 animate-ring-expand" style={{ animationDelay: "0.5s" }} />
                     <Radar size={20} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
@@ -132,7 +165,6 @@ const UploadSection = () => {
                   <p className="text-sm text-foreground/90 font-medium mb-4">
                     Colorizing...
                   </p>
-                  {/* Progress bar */}
                   <div className="w-full max-w-xs mx-auto h-1.5 rounded-full bg-secondary overflow-hidden">
                     <motion.div
                       className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70"
@@ -172,6 +204,116 @@ const UploadSection = () => {
               )}
             </AnimatePresence>
           </div>
+
+          {/* Divider */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2, ease }}
+            className="flex items-center gap-4 my-8"
+          >
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+            <span className="text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground/70 whitespace-nowrap">
+              Or Segment by Location
+            </span>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+          </motion.div>
+
+          {/* Location buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3, ease }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+          >
+            <button
+              onClick={handleCurrentLocation}
+              className="group relative h-14 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:brightness-110 press"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-[hsl(217,91%,50%)] to-[hsl(200,80%,50%)] opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+              <div className="relative z-10 flex items-center justify-center gap-2.5 h-full px-5">
+                <MapPin size={18} className="text-foreground" />
+                <span className="text-sm font-semibold text-foreground tracking-[-0.01em]">
+                  Use Current Location
+                </span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setShowCoordInput(!showCoordInput)}
+              className="group relative h-14 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:brightness-110 press"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-[hsl(260,60%,50%)] to-[hsl(280,70%,55%)] opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+              <div className="relative z-10 flex items-center justify-center gap-2.5 h-full px-5">
+                <Globe size={18} className="text-foreground" />
+                <span className="text-sm font-semibold text-foreground tracking-[-0.01em]">
+                  Enter Coordinates
+                </span>
+              </div>
+            </button>
+          </motion.div>
+
+          {/* Coordinate input panel */}
+          <AnimatePresence>
+            {showCoordInput && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: "auto", marginTop: 12 }}
+                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                transition={{ duration: 0.35, ease }}
+                className="overflow-hidden"
+              >
+                <div className="glass-elevated rounded-xl p-5 relative">
+                  <button
+                    onClick={() => setShowCoordInput(false)}
+                    className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                      <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                        Latitude
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        placeholder="e.g. 28.6139"
+                        value={lat}
+                        onChange={(e) => setLat(e.target.value)}
+                        className="w-full h-10 rounded-lg bg-secondary/80 border border-border/50 px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all duration-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                        Longitude
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        placeholder="e.g. 77.2090"
+                        value={lng}
+                        onChange={(e) => setLng(e.target.value)}
+                        className="w-full h-10 rounded-lg bg-secondary/80 border border-border/50 px-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    variant="glow"
+                    size="sm"
+                    className="w-full"
+                    onClick={handleCoordSubmit}
+                  >
+                    Start Segmentation
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </div>
     </section>

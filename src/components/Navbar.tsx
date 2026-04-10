@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
 
 const navLinks = [
   { label: "Features", href: "#colorizer" },
@@ -14,7 +15,7 @@ const navLinks = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -40,7 +41,7 @@ const Navbar = () => {
         }`}
       >
         <nav className="container mx-auto flex h-16 items-center justify-between px-6">
-          <a href="/" className="flex items-center gap-2.5 group">
+          <Link to="/" className="flex items-center gap-2.5 group">
             <div className="relative h-7 w-7">
               <div className="absolute inset-0 rounded-md bg-primary/20 group-hover:bg-primary/30 transition-colors duration-300" />
               <div className="absolute inset-1.5 rounded-sm bg-primary" />
@@ -48,28 +49,34 @@ const Navbar = () => {
             <span className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">
               SAR<span className="text-primary">Chroma</span>
             </span>
-          </a>
+          </Link>
 
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((item) => (
-              <a key={item.label} href={item.href} className="px-4 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-foreground/5">
-                {item.label}
-              </a>
+              item.href.startsWith("#") ? (
+                <a key={item.label} href={item.href} className="px-4 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-foreground/5">
+                  {item.label}
+                </a>
+              ) : (
+                <Link key={item.label} to={item.href} className="px-4 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-foreground/5">
+                  {item.label}
+                </Link>
+              )
             ))}
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            {user ? (
+            {loading ? null : user ? (
               <Button variant="glow" size="sm" asChild>
-                <a href="/dashboard">Open App</a>
+                <Link to="/dashboard">Open App</Link>
               </Button>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <a href="/auth">Sign In</a>
+                  <Link to="/auth">Sign In</Link>
                 </Button>
                 <Button variant="glow" size="sm" asChild>
-                  <a href="/auth">Get Started Free</a>
+                  <Link to="/auth">Get Started Free</Link>
                 </Button>
               </>
             )}
@@ -86,18 +93,22 @@ const Navbar = () => {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="fixed inset-0 z-40 bg-background/95 backdrop-blur-2xl md:hidden">
             <motion.nav initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col items-center justify-center h-full gap-2 px-6">
               {navLinks.map((item, i) => (
-                <motion.a key={item.label} href={item.href} onClick={() => setMobileOpen(false)} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.06 }} className="w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/80 hover:text-foreground rounded-xl hover:bg-foreground/5 transition-all duration-200">
-                  {item.label}
-                </motion.a>
+                <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.06 }}>
+                  {item.href.startsWith("#") ? (
+                    <a href={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/80 hover:text-foreground rounded-xl hover:bg-foreground/5 transition-all duration-200">{item.label}</a>
+                  ) : (
+                    <Link to={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/80 hover:text-foreground rounded-xl hover:bg-foreground/5 transition-all duration-200">{item.label}</Link>
+                  )}
+                </motion.div>
               ))}
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: navLinks.length * 0.06 }} className="mt-4 flex gap-3">
                 {user ? (
                   <Button variant="glow" size="lg" asChild onClick={() => setMobileOpen(false)}>
-                    <a href="/dashboard">Open App</a>
+                    <Link to="/dashboard">Open App</Link>
                   </Button>
                 ) : (
                   <Button variant="glow" size="lg" asChild onClick={() => setMobileOpen(false)}>
-                    <a href="/auth">Get Started Free</a>
+                    <Link to="/auth">Get Started Free</Link>
                   </Button>
                 )}
               </motion.div>

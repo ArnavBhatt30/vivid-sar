@@ -1,0 +1,74 @@
+import { LayoutDashboard, Image, Settings, Home, Radar } from "lucide-react";
+import { NavLink } from "@/components/NavLink";
+import { useLocation } from "react-router-dom";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
+
+const mainItems = [
+  { title: "Home", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Gallery", url: "/gallery", icon: Image },
+  { title: "Settings", url: "/settings", icon: Settings },
+];
+
+export function AppSidebar() {
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+  const location = useLocation();
+
+  const isActive = (path: string) =>
+    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+
+  return (
+    <Sidebar collapsible="icon" className="border-r border-border/30 bg-[hsl(var(--surface-1))]">
+      <SidebarContent>
+        {/* Brand */}
+        <div className="flex items-center gap-2.5 px-4 py-5">
+          <div className="relative h-7 w-7 shrink-0">
+            <div className="absolute inset-0 rounded-md bg-primary/20" />
+            <div className="absolute inset-1.5 rounded-sm bg-primary" />
+          </div>
+          {!collapsed && (
+            <span className="text-[15px] font-semibold tracking-[-0.03em] text-foreground">
+              SAR<span className="text-primary">Chroma</span>
+            </span>
+          )}
+        </div>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground/50 font-medium">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {mainItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      end={item.url === "/"}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all duration-200"
+                      activeClassName="bg-primary/10 text-primary font-medium"
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+}

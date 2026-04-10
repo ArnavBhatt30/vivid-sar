@@ -122,31 +122,45 @@
 }
 
 @layer utilities {
+  /* ─── Apple-style frosted glass ─── */
   .glass {
-    background: hsl(var(--foreground) / 0.03);
+    background: hsla(0, 0%, 100%, 0.04);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid hsl(var(--foreground) / 0.06);
+    border: 1px solid hsla(0, 0%, 100%, 0.06);
   }
   .glass-elevated {
-    background: hsl(var(--foreground) / 0.05);
+    background: hsla(0, 0%, 100%, 0.06);
     backdrop-filter: blur(60px) saturate(190%);
     -webkit-backdrop-filter: blur(60px) saturate(190%);
-    border: 1px solid hsl(var(--foreground) / 0.08);
+    border: 1px solid hsla(0, 0%, 100%, 0.08);
   }
   .glass-strong {
-    background: hsl(var(--foreground) / 0.08);
+    background: hsla(0, 0%, 100%, 0.08);
     backdrop-filter: blur(80px) saturate(200%);
     -webkit-backdrop-filter: blur(80px) saturate(200%);
-    border: 1px solid hsl(var(--foreground) / 0.12);
+    border: 1px solid hsla(0, 0%, 100%, 0.1);
   }
   .glass-card {
-    background: hsl(var(--foreground) / 0.04);
+    background: hsla(0, 0%, 100%, 0.04);
     backdrop-filter: blur(48px) saturate(180%);
     -webkit-backdrop-filter: blur(48px) saturate(180%);
-    border: 1px solid hsl(var(--foreground) / 0.07);
-    box-shadow: 0 8px 32px -8px hsl(var(--foreground) / 0.06),
-                inset 0 1px 0 hsl(var(--foreground) / 0.04);
+    border: 1px solid hsla(0, 0%, 100%, 0.07);
+  }
+
+  /* Light mode overrides — use dark tint instead */
+  :root .glass,
+  :root .glass-card {
+    background: hsla(0, 0%, 0%, 0.02);
+    border-color: hsla(0, 0%, 0%, 0.06);
+  }
+  :root .glass-elevated {
+    background: hsla(0, 0%, 0%, 0.03);
+    border-color: hsla(0, 0%, 0%, 0.08);
+  }
+  :root .glass-strong {
+    background: hsla(0, 0%, 0%, 0.04);
+    border-color: hsla(0, 0%, 0%, 0.1);
   }
 
   .glow-sm {

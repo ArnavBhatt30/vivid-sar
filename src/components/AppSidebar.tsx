@@ -1,4 +1,4 @@
-import { LayoutDashboard, Image, Settings, Home, Map, FileText, DollarSign, Beaker, LogOut } from "lucide-react";
+import { LayoutDashboard, Image, Settings, Home, Map, FileText, Beaker, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,7 +25,6 @@ const mainItems = [
 const resourceItems = [
   { title: "Research", url: "/research", icon: Beaker },
   { title: "API Docs", url: "/docs", icon: FileText },
-  { title: "Pricing", url: "/pricing", icon: DollarSign },
 ];
 
 export function AppSidebar() {

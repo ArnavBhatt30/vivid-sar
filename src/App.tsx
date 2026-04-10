@@ -15,7 +15,7 @@ import Gallery from "./pages/Gallery.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import ResearchPage from "./pages/ResearchPage.tsx";
-import PricingPage from "./pages/PricingPage.tsx";
+
 import ApiDocsPage from "./pages/ApiDocsPage.tsx";
 import MapPage from "./pages/MapPage.tsx";
 
@@ -35,7 +35,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/research" element={<ResearchPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
+              
               <Route path="/docs" element={<ApiDocsPage />} />
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />

@@ -10,7 +10,6 @@ import UserAvatarDropdown from "./UserAvatarDropdown";
 const navLinks = [
   { label: "Features", href: "#colorizer" },
   { label: "Research", href: "/research" },
-  { label: "Pricing", href: "/pricing" },
   { label: "API Docs", href: "/docs" },
 ];
 

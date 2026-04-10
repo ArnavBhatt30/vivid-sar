@@ -293,25 +293,21 @@ const UploadSection = () => {
             >
               <button
                 onClick={handleCurrentLocation}
-                className="group relative h-14 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:brightness-110 press"
+                className="group relative h-14 rounded-2xl overflow-hidden transition-all duration-500 hover:scale-[1.02] press bg-primary/10 border border-primary/20 hover:border-primary/40 hover:bg-primary/15"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-[hsl(217,91%,50%)] to-[hsl(200,80%,50%)] opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-                <div className="relative z-10 flex items-center justify-center gap-2.5 h-full px-5">
-                  <MapPin size={18} className="text-foreground" />
-                  <span className="text-sm font-semibold text-foreground tracking-[-0.01em]">Use Current Location</span>
+                <div className="relative z-10 flex items-center justify-center gap-3 h-full px-6">
+                  <MapPin size={16} className="text-primary" />
+                  <span className="text-[13px] font-medium tracking-[-0.02em] text-foreground">Use Current Location</span>
                 </div>
               </button>
 
               <button
                 onClick={() => setShowCoordInput(!showCoordInput)}
-                className="group relative h-14 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:brightness-110 press"
+                className="group relative h-14 rounded-2xl overflow-hidden transition-all duration-500 hover:scale-[1.02] press bg-foreground/[0.04] border border-border/50 hover:border-foreground/20 hover:bg-foreground/[0.07]"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-[hsl(260,60%,50%)] to-[hsl(280,70%,55%)] opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-                <div className="relative z-10 flex items-center justify-center gap-2.5 h-full px-5">
-                  <Globe size={18} className="text-foreground" />
-                  <span className="text-sm font-semibold text-foreground tracking-[-0.01em]">Enter Coordinates</span>
+                <div className="relative z-10 flex items-center justify-center gap-3 h-full px-6">
+                  <Globe size={16} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <span className="text-[13px] font-medium tracking-[-0.02em] text-foreground/80 group-hover:text-foreground transition-colors">Enter Coordinates</span>
                 </div>
               </button>
             </motion.div>

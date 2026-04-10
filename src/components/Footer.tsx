@@ -6,7 +6,6 @@ const footerLinks = [
     links: [
       { label: "Colorizer", href: "#colorizer" },
       { label: "API", href: "/docs" },
-      { label: "Pricing", href: "/pricing" },
       { label: "Gallery", href: "/gallery" },
     ],
   },

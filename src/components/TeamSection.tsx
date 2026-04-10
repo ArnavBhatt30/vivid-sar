@@ -36,7 +36,7 @@ const TeamSection = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.12, ease }}
               whileHover={{ y: -8 }}
-              className="glass-card rounded-3xl p-10 text-center group cursor-default transition-all duration-500 hover:glow-sm"
+              className="glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-center group cursor-default transition-all duration-500 hover:glow-sm"
             >
               <div className="w-16 h-16 rounded-2xl glass-elevated flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-400">
                 <User size={24} className="text-muted-foreground group-hover:text-primary transition-colors duration-300" />

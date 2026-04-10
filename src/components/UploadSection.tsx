@@ -123,7 +123,7 @@ const UploadSection = () => {
                     }`}
                   >
                     {s.tag && (
-                      <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                     <span className="absolute top-2 right-2 sm:top-3 sm:right-3 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
                         {s.tag}
                       </span>
                     )}
@@ -157,7 +157,7 @@ const UploadSection = () => {
             transition={{ duration: 0.7, ease }}
             className="max-w-lg mx-auto"
           >
-            <div className="glass-card rounded-3xl p-10 sm:p-12 text-center relative overflow-hidden">
+            <div className="glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-12 text-center relative overflow-hidden">
               <div className="absolute inset-5 rounded-2xl border border-dashed border-foreground/[0.06] pointer-events-none" />
               <AnimatePresence mode="wait">
                 {phase === "idle" && (

@@ -22,7 +22,7 @@ const CTASection = () => {
           transition={{ duration: 0.9, ease }}
           className="max-w-3xl mx-auto"
         >
-          <div className="glass-strong rounded-[2.5rem] p-14 sm:p-20 text-center">
+          <div className="glass-strong rounded-2xl sm:rounded-[2.5rem] p-8 sm:p-14 md:p-20 text-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -34,11 +34,11 @@ const CTASection = () => {
               <span className="text-sm font-medium text-muted-foreground">Free to use — open research project</span>
             </motion.div>
 
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-[-0.045em] mb-7">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.045em] mb-5 sm:mb-7">
               Ready to see SAR in{" "}
               <span className="text-gradient-hero">full color?</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-lg mx-auto mb-14 leading-[1.7] font-light">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto mb-10 sm:mb-14 leading-[1.7] font-light">
               Try SARChroma and see how GAN-based colorization transforms raw radar imagery into interpretable visuals.
             </p>
 

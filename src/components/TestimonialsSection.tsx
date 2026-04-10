@@ -45,7 +45,7 @@ const TestimonialsSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: i * 0.1, ease }}
-                className="glass-card rounded-3xl p-9 flex flex-col group hover:glass-elevated transition-all duration-500 h-full"
+                className="glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-9 flex flex-col group hover:glass-elevated transition-all duration-500 h-full"
               >
                 <span className="text-xs font-semibold text-primary/80 bg-primary/8 border border-primary/10 px-4 py-2 rounded-full self-start mb-7 tracking-[0.03em]">
                   {h.label}

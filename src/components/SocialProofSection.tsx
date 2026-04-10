@@ -24,7 +24,7 @@ const SocialProofSection = () => {
         >
           Built with industry-standard tools
         </motion.p>
-        <div className="flex flex-wrap items-center justify-center gap-x-14 gap-y-8">
+        <div className="flex flex-wrap items-center justify-center gap-x-8 sm:gap-x-14 gap-y-6 sm:gap-y-8">
           {techStack.map((item, i) => (
             <motion.div
               key={item.name}
@@ -32,7 +32,7 @@ const SocialProofSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.07, ease }}
-              className="text-2xl sm:text-3xl font-bold tracking-[0.08em] text-muted-foreground/15 hover:text-muted-foreground/35 transition-colors duration-500 select-none"
+              className="text-xl sm:text-2xl md:text-3xl font-bold tracking-[0.08em] text-muted-foreground/15 hover:text-muted-foreground/35 transition-colors duration-500 select-none"
             >
               {item.name}
             </motion.div>

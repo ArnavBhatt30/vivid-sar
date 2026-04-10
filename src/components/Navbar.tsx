@@ -36,13 +36,17 @@ const Navbar = () => {
 
         {/* Center nav */}
         <div className="hidden md:flex items-center gap-1">
-          {["Colorizer", "Research", "About"].map((item) => (
+          {[
+            { label: "Colorizer", href: "#colorizer" },
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Gallery", href: "/gallery" },
+          ].map((item) => (
             <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
+              key={item.label}
+              href={item.href}
               className="px-4 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-foreground/5"
             >
-              {item}
+              {item.label}
             </a>
           ))}
         </div>

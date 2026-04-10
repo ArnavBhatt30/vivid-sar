@@ -1,90 +1,78 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import sarBefore from "@/assets/sar-before.jpg";
-import sarAfter from "@/assets/sar-after.jpg";
+
+const ease = [0.25, 0.1, 0.25, 1];
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-16 hero-gradient overflow-hidden">
-      {/* Grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-        backgroundSize: '60px 60px'
-      }} />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background layers */}
+      <div className="absolute inset-0 bg-grid" />
+      <div className="absolute inset-0 bg-radial-hero" />
 
-      <div className="container mx-auto px-6 py-20 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* Ambient glow behind heading */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-primary/[0.06] blur-[120px] pointer-events-none" />
+
+      <div className="container mx-auto px-6 relative z-10 pt-24 pb-20">
+        <div className="max-w-3xl mx-auto text-center">
+          {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 mb-8"
+            transition={{ duration: 0.6, ease }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass mb-10"
           >
-            <Sparkles size={14} className="text-primary" />
-            <span className="text-xs font-medium text-primary">AI-Powered SAR Colorization</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-soft" />
+            <span className="text-xs font-medium text-muted-foreground tracking-wide">
+              Deep Learning SAR Colorization
+            </span>
           </motion.div>
 
+          {/* Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold tracking-tight leading-[1.1] mb-6"
+            transition={{ duration: 0.7, delay: 0.1, ease }}
+            className="text-[clamp(2.5rem,6vw,5rem)] font-extrabold tracking-[-0.04em] leading-[1.05] mb-6"
           >
-            Transform Radar into{" "}
-            <span className="text-gradient">Vivid Reality</span>
+            Giving Radar a{" "}
+            <span className="text-gradient-hero animate-gradient-shift glow-text">
+              New Lens.
+            </span>
           </motion.h1>
 
+          {/* Subheading */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+            transition={{ duration: 0.6, delay: 0.2, ease }}
+            className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed font-light"
           >
-            Turn monochrome SAR satellite imagery into photorealistic color images
-            using state-of-the-art deep learning. See the world in full spectrum.
+            Transform monochrome SAR satellite imagery into photorealistic RGB
+            using GAN-based deep learning — revealing what radar sees but eyes cannot.
           </motion.p>
 
+          {/* CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            transition={{ duration: 0.6, delay: 0.3, ease }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8 h-12 text-base">
-              Start Colorizing <ArrowRight size={16} className="ml-2" />
+            <Button variant="glow" size="lg" className="group">
+              Try Colorizer
+              <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" />
             </Button>
-            <Button size="lg" variant="outline" className="border-border hover:bg-secondary font-medium px-8 h-12 text-base">
-              View Demo
+            <Button variant="outline" size="lg">
+              Read the Paper
             </Button>
           </motion.div>
         </div>
-
-        {/* Before / After showcase */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-20 max-w-5xl mx-auto"
-        >
-          <div className="glass-card glow-border p-2 sm:p-3">
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              <div className="relative rounded-xl overflow-hidden">
-                <img src={sarBefore} alt="SAR grayscale input" width={960} height={640} className="w-full h-full object-cover" />
-                <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm border border-border/50">
-                  <span className="text-xs font-medium text-muted-foreground">Input — SAR</span>
-                </div>
-              </div>
-              <div className="relative rounded-xl overflow-hidden">
-                <img src={sarAfter} alt="AI colorized output" width={960} height={640} className="w-full h-full object-cover" />
-                <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm border border-border/50">
-                  <span className="text-xs font-medium text-primary">Output — Colorized</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
+
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 };

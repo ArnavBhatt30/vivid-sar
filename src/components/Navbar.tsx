@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import ThemeToggle from "./ThemeToggle";
+import UserAvatarDropdown from "./UserAvatarDropdown";
 
 const navLinks = [
   { label: "Features", href: "#colorizer" },
@@ -65,11 +67,15 @@ const Navbar = () => {
             ))}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
             {loading ? null : user ? (
-              <Button variant="glow" size="sm" asChild>
-                <Link to="/dashboard">Open App</Link>
-              </Button>
+              <>
+                <Button variant="glow" size="sm" asChild>
+                  <Link to="/dashboard">Open App</Link>
+                </Button>
+                <UserAvatarDropdown />
+              </>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
@@ -82,9 +88,12 @@ const Navbar = () => {
             )}
           </div>
 
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors">
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle />
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="relative w-10 h-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors">
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </nav>
       </motion.header>
 

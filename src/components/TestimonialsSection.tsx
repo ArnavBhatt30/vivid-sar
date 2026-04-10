@@ -20,37 +20,37 @@ const highlights = [
 
 const TestimonialsSection = () => {
   return (
-    <section className="py-32 relative">
+    <section className="py-36 relative">
       <div className="container mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease }}
-          className="text-center mb-16"
+          transition={{ duration: 0.8, ease }}
+          className="text-center mb-20"
         >
-          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-primary/70 mb-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary/70 mb-5">
             Highlights
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.04em]">
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.04em]">
             What makes SARChroma special
           </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-5 max-w-6xl mx-auto">
           {highlights.map((h, i) => (
             <ParallaxCard key={h.label}>
               <motion.div
-                initial={{ opacity: 0, y: 28 }}
+                initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1, ease }}
-                className="glass rounded-3xl p-8 flex flex-col group hover:glass-elevated transition-all duration-500 h-full"
+                transition={{ duration: 0.6, delay: i * 0.1, ease }}
+                className="glass-card rounded-3xl p-9 flex flex-col group hover:glass-elevated transition-all duration-500 h-full"
               >
-                <span className="text-[10px] font-medium text-primary/70 bg-primary/8 border border-primary/10 px-3 py-1.5 rounded-full self-start mb-6 tracking-[0.03em]">
+                <span className="text-xs font-semibold text-primary/80 bg-primary/8 border border-primary/10 px-4 py-2 rounded-full self-start mb-7 tracking-[0.03em]">
                   {h.label}
                 </span>
-                <p className="text-[15px] text-foreground/75 leading-[1.8] flex-1 font-light">
+                <p className="text-[17px] text-foreground/70 leading-[1.85] flex-1 font-light">
                   "{h.quote}"
                 </p>
               </motion.div>

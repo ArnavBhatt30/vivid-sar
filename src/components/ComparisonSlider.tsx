@@ -37,19 +37,19 @@ const ComparisonSlider = () => {
   }, [isDragging, updatePosition]);
 
   return (
-    <section id="colorizer" className="py-28 relative">
+    <section id="colorizer" className="py-32 relative">
       <div className="container mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-          className="text-center mb-14"
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+          className="text-center mb-16"
         >
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary/80 mb-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary/70 mb-5">
             Interactive Demo
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.03em]">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-[-0.04em]">
             See the Difference
           </h2>
         </motion.div>
@@ -58,60 +58,27 @@ const ComparisonSlider = () => {
           ref={containerRef}
           initial={{ opacity: 0, scale: 0.96 }}
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="relative max-w-4xl mx-auto aspect-[16/10] rounded-2xl overflow-hidden cursor-col-resize select-none glass glow-md"
-          onMouseDown={(e) => {
-            setIsDragging(true);
-            updatePosition(e.clientX);
-          }}
-          onTouchStart={(e) => {
-            setIsDragging(true);
-            updatePosition(e.touches[0].clientX);
-          }}
+          transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+          className="relative max-w-5xl mx-auto aspect-[16/10] rounded-3xl overflow-hidden cursor-col-resize select-none glass-card glow-md"
+          onMouseDown={(e) => { setIsDragging(true); updatePosition(e.clientX); }}
+          onTouchStart={(e) => { setIsDragging(true); updatePosition(e.touches[0].clientX); }}
         >
-          {/* After (colorized — full background) */}
-          <img
-            src={sarColorized}
-            alt="AI colorized SAR output"
-            className="absolute inset-0 w-full h-full object-cover"
-            draggable={false}
-          />
-
-          {/* Before (grayscale — clipped) */}
-          <div
-            className="absolute inset-0 overflow-hidden"
-            style={{ width: `${position}%` }}
-          >
-            <img
-              src={sarGrayscale}
-              alt="Raw SAR grayscale input"
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ width: `${containerRef.current?.offsetWidth || 100}px`, maxWidth: 'none' }}
-              draggable={false}
-            />
+          <img src={sarColorized} alt="AI colorized SAR output" className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+          <div className="absolute inset-0 overflow-hidden" style={{ width: `${position}%` }}>
+            <img src={sarGrayscale} alt="Raw SAR grayscale input" className="absolute inset-0 w-full h-full object-cover" style={{ width: `${containerRef.current?.offsetWidth || 100}px`, maxWidth: 'none' }} draggable={false} />
           </div>
 
-          {/* Divider line */}
-          <div
-            className="absolute top-0 bottom-0 w-px bg-foreground/30"
-            style={{ left: `${position}%` }}
-          >
-            {/* Handle */}
-            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass-elevated flex items-center justify-center transition-transform duration-200 ${isDragging ? 'scale-110' : 'hover:scale-110'}`}>
+          <div className="absolute top-0 bottom-0 w-px bg-foreground/25" style={{ left: `${position}%` }}>
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 rounded-full glass-elevated flex items-center justify-center transition-transform duration-200 ${isDragging ? 'scale-110' : 'hover:scale-110'}`}>
               <div className="w-5 h-5 rounded-full bg-primary/90 glow-sm" />
             </div>
           </div>
 
-          {/* Labels */}
-          <div className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full glass">
-            <span className="text-[11px] font-medium text-muted-foreground tracking-wide uppercase">
-              Raw SAR
-            </span>
+          <div className="absolute bottom-5 left-5 px-4 py-2 rounded-full glass-elevated">
+            <span className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">Raw SAR</span>
           </div>
-          <div className="absolute bottom-4 right-4 px-3 py-1.5 rounded-full glass">
-            <span className="text-[11px] font-medium text-primary tracking-wide uppercase">
-              AI Colorized
-            </span>
+          <div className="absolute bottom-5 right-5 px-4 py-2 rounded-full glass-elevated">
+            <span className="text-xs font-semibold text-primary tracking-wider uppercase">AI Colorized</span>
           </div>
         </motion.div>
       </div>

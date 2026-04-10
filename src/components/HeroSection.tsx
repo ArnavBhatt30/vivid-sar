@@ -3,10 +3,12 @@ import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MagneticWrap } from "./MicroInteractions";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number];
 
 const HeroSection = () => {
+  const { user } = useAuth();
   return (
     <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden">
       {/* Ambient layers */}
@@ -68,7 +70,7 @@ const HeroSection = () => {
           >
             <MagneticWrap>
               <Button variant="glow" size="lg" className="group text-base px-10 h-14 rounded-2xl press" asChild>
-                <Link to="/auth">
+                <Link to={user ? "/dashboard" : "/auth"}>
                   Try It Out
                   <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>

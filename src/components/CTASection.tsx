@@ -3,10 +3,12 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MagneticWrap } from "./MicroInteractions";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number];
 
 const CTASection = () => {
+  const { user } = useAuth();
   return (
     <section className="py-36 relative overflow-hidden">
       <div className="absolute inset-0 bg-radial-hero opacity-50" />
@@ -43,7 +45,7 @@ const CTASection = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <MagneticWrap>
                 <Button variant="glow" size="lg" className="group press px-10 h-14 rounded-2xl text-base" asChild>
-                  <Link to="/auth">
+                  <Link to={user ? "/dashboard" : "/auth"}>
                     Get Started
                     <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>

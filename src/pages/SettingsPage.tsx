@@ -72,7 +72,7 @@ const SettingsPage = () => {
             <div className="p-5 space-y-4">
               {section.fields?.map((field) => (
                 <div key={field.label}>
-                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">
                     {field.label}
                   </label>
                   <input

@@ -7,7 +7,7 @@ const members = [
   { name: "Aman Rathore", role: "Data Architect" },
 ];
 
-const ease = [0.25, 0.1, 0.25, 1];
+const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number];
 
 const TeamSection = () => {
   return (

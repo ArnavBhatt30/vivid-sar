@@ -14,13 +14,13 @@ const AnimatedStat = ({ value, suffix, prefix, label, sublabel, delay }: {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay, ease }}
-      className="text-center"
+      className="text-center glass rounded-3xl p-8"
     >
-      <p className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[-0.04em] text-gradient-hero mb-2">
+      <p className="text-4xl sm:text-5xl font-extrabold tracking-[-0.05em] text-gradient-hero mb-3">
         {prefix}{count.toLocaleString()}{suffix}
       </p>
-      <p className="text-sm font-semibold text-foreground/80 mb-0.5">{label}</p>
-      <p className="text-[11px] text-muted-foreground">{sublabel}</p>
+      <p className="text-[14px] font-medium text-foreground/80 mb-1 tracking-[-0.01em]">{label}</p>
+      <p className="text-[11px] text-muted-foreground/60 font-light">{sublabel}</p>
     </motion.div>
   );
 };
@@ -34,11 +34,12 @@ const stats = [
 
 const StatsSection = () => {
   return (
-    <section className="py-24 relative bg-mesh">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
+    <section className="py-28 relative">
+      <div className="absolute inset-0 bg-radial-hero opacity-30" />
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {stats.map((stat, i) => (
-            <AnimatedStat key={stat.label} {...stat} delay={i * 0.1} />
+            <AnimatedStat key={stat.label} {...stat} delay={i * 0.08} />
           ))}
         </div>
       </div>

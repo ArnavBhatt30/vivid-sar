@@ -20,19 +20,19 @@ const highlights = [
 
 const TestimonialsSection = () => {
   return (
-    <section className="py-28 relative">
+    <section className="py-32 relative">
       <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease }}
-          className="text-center mb-14"
+          transition={{ duration: 0.7, ease }}
+          className="text-center mb-16"
         >
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary/80 mb-4">
+          <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-primary/70 mb-5">
             Highlights
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.03em]">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.04em]">
             What makes SARChroma special
           </h2>
         </motion.div>
@@ -41,17 +41,17 @@ const TestimonialsSection = () => {
           {highlights.map((h, i) => (
             <ParallaxCard key={h.label}>
               <motion.div
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1, ease }}
-                className="glass-elevated rounded-2xl p-6 flex flex-col group hover:border-border/40 transition-all duration-300 h-full"
+                className="glass rounded-3xl p-8 flex flex-col group hover:glass-elevated transition-all duration-500 h-full"
               >
-                <span className="text-[10px] font-semibold text-primary/80 bg-primary/10 px-2.5 py-1 rounded-full self-start mb-4">
+                <span className="text-[10px] font-medium text-primary/70 bg-primary/8 border border-primary/10 px-3 py-1.5 rounded-full self-start mb-6 tracking-[0.03em]">
                   {h.label}
                 </span>
-                <p className="text-sm text-foreground/80 leading-relaxed flex-1">
-                  {h.quote}
+                <p className="text-[15px] text-foreground/75 leading-[1.8] flex-1 font-light">
+                  "{h.quote}"
                 </p>
               </motion.div>
             </ParallaxCard>

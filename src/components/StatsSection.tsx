@@ -16,7 +16,7 @@ const AnimatedStat = ({ value, suffix, prefix, label, sublabel, delay }: {
       transition={{ duration: 0.6, delay, ease }}
       className="text-center glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-10"
     >
-      <p className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-[-0.05em] text-gradient-hero mb-2 sm:mb-4">
+      <p className="text-2xl sm:text-5xl md:text-6xl font-extrabold tracking-[-0.05em] text-gradient-hero mb-2 sm:mb-4 whitespace-nowrap">
         {prefix}{count.toLocaleString()}{suffix}
       </p>
       <p className="text-sm sm:text-base font-medium text-foreground/80 mb-1 sm:mb-1.5 tracking-[-0.01em]">{label}</p>

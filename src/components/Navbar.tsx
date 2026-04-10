@@ -35,32 +35,32 @@ const Navbar = () => {
       <motion.header
         initial={{ y: -10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-apple ${
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-apple ${
           scrolled || mobileOpen
-            ? "bg-background/70 backdrop-blur-2xl border-b border-border/30"
+            ? "bg-background/60 backdrop-blur-3xl border-b border-foreground/[0.04]"
             : "bg-transparent"
         }`}
       >
         <nav className="container mx-auto flex h-16 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="relative h-7 w-7">
-              <div className="absolute inset-0 rounded-md bg-primary/20 group-hover:bg-primary/30 transition-colors duration-300" />
-              <div className="absolute inset-1.5 rounded-sm bg-primary" />
+              <div className="absolute inset-0 rounded-lg bg-primary/15 group-hover:bg-primary/25 transition-colors duration-400" />
+              <div className="absolute inset-1.5 rounded-md bg-primary" />
             </div>
-            <span className="text-[15px] font-semibold tracking-[-0.02em] text-foreground">
+            <span className="text-[15px] font-semibold tracking-[-0.03em] text-foreground">
               SAR<span className="text-primary">Chroma</span>
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-0.5">
             {navLinks.map((item) => (
               item.href.startsWith("#") ? (
-                <a key={item.label} href={item.href} className="px-4 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-foreground/5">
+                <a key={item.label} href={item.href} className="px-4 py-2 text-[13px] text-muted-foreground/70 hover:text-foreground transition-colors duration-300 rounded-xl hover:bg-foreground/[0.04]">
                   {item.label}
                 </a>
               ) : (
-                <Link key={item.label} to={item.href} className="px-4 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-foreground/5">
+                <Link key={item.label} to={item.href} className="px-4 py-2 text-[13px] text-muted-foreground/70 hover:text-foreground transition-colors duration-300 rounded-xl hover:bg-foreground/[0.04]">
                   {item.label}
                 </Link>
               )
@@ -71,18 +71,18 @@ const Navbar = () => {
             <ThemeToggle />
             {loading ? null : user ? (
               <>
-                <Button variant="glow" size="sm" asChild>
+                <Button variant="glow" size="sm" className="rounded-xl" asChild>
                   <Link to="/dashboard">Open App</Link>
                 </Button>
                 <UserAvatarDropdown />
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="rounded-xl" asChild>
                   <Link to="/auth">Sign In</Link>
                 </Button>
-                <Button variant="glow" size="sm" asChild>
-                  <Link to="/auth">Get Started Free</Link>
+                <Button variant="glow" size="sm" className="rounded-xl" asChild>
+                  <Link to="/auth">Get Started</Link>
                 </Button>
               </>
             )}
@@ -90,7 +90,7 @@ const Navbar = () => {
 
           <div className="flex md:hidden items-center gap-2">
             <ThemeToggle />
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="relative w-10 h-10 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors">
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="relative w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-colors">
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -99,25 +99,25 @@ const Navbar = () => {
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="fixed inset-0 z-40 bg-background/95 backdrop-blur-2xl md:hidden">
-            <motion.nav initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col items-center justify-center h-full gap-2 px-6">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="fixed inset-0 z-40 bg-background/90 backdrop-blur-3xl md:hidden">
+            <motion.nav initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col items-center justify-center h-full gap-2 px-6">
               {navLinks.map((item, i) => (
-                <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.06 }}>
+                <motion.div key={item.label} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.05 }}>
                   {item.href.startsWith("#") ? (
-                    <a href={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/80 hover:text-foreground rounded-xl hover:bg-foreground/5 transition-all duration-200">{item.label}</a>
+                    <a href={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/70 hover:text-foreground rounded-2xl hover:bg-foreground/[0.04] transition-all duration-300">{item.label}</a>
                   ) : (
-                    <Link to={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/80 hover:text-foreground rounded-xl hover:bg-foreground/5 transition-all duration-200">{item.label}</Link>
+                    <Link to={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/70 hover:text-foreground rounded-2xl hover:bg-foreground/[0.04] transition-all duration-300">{item.label}</Link>
                   )}
                 </motion.div>
               ))}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: navLinks.length * 0.06 }} className="mt-4 flex gap-3">
+              <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: navLinks.length * 0.05 }} className="mt-6">
                 {user ? (
-                  <Button variant="glow" size="lg" asChild onClick={() => setMobileOpen(false)}>
+                  <Button variant="glow" size="lg" className="rounded-2xl px-8" asChild onClick={() => setMobileOpen(false)}>
                     <Link to="/dashboard">Open App</Link>
                   </Button>
                 ) : (
-                  <Button variant="glow" size="lg" asChild onClick={() => setMobileOpen(false)}>
-                    <Link to="/auth">Get Started Free</Link>
+                  <Button variant="glow" size="lg" className="rounded-2xl px-8" asChild onClick={() => setMobileOpen(false)}>
+                    <Link to="/auth">Get Started</Link>
                   </Button>
                 )}
               </motion.div>

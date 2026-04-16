@@ -1,6 +1,6 @@
 import { useState, useRef, DragEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Check, Radar, MapPin, Globe, X } from "lucide-react";
+import { Upload, Check, Radar, MapPin, Globe, X, Plus, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,13 @@ interface UploadSectionProps {
   embedded?: boolean;
 }
 
+interface QueueItem {
+  id: string;
+  file: File;
+  progress: number;
+  phase: Phase;
+}
+
 const UploadSection = ({ embedded }: UploadSectionProps) => {
   const { user } = useAuth();
   const [phase, setPhase] = useState<Phase>("idle");
@@ -34,25 +41,29 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
   const [source, setSource] = useState<Source>("sentinel1");
+  const [isDragging, setIsDragging] = useState(false);
+  const [batchMode, setBatchMode] = useState(false);
+  const [batchQueue, setBatchQueue] = useState<QueueItem[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const batchInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: DragEvent) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = (e: DragEvent) => { e.preventDefault(); setIsDragging(false); };
   const handleDrop = (e: DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    setSelectedFile(file);
-    toast.success(`Selected: ${file.name}`);
-    simulateProcessing(file.name);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 1 || batchMode) {
+      addToBatch(files);
+    } else if (files[0]) {
+      setSelectedFile(files[0]);
+      toast.success(`Selected: ${files[0].name}`);
+      simulateProcessing(files[0].name);
+    }
   };
 
-  const startUpload = () => {
-    fileInputRef.current?.click();
-  };
+  const startUpload = () => fileInputRef.current?.click();
 
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,6 +72,61 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     toast.success(`Selected: ${file.name}`);
     simulateProcessing(file.name);
     e.target.value = "";
+  };
+
+  const handleBatchFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    addToBatch(files);
+    e.target.value = "";
+  };
+
+  const addToBatch = (files: File[]) => {
+    const newItems: QueueItem[] = files.map((f) => ({
+      id: crypto.randomUUID(),
+      file: f,
+      progress: 0,
+      phase: "idle" as Phase,
+    }));
+    setBatchQueue((prev) => [...prev, ...newItems]);
+    setBatchMode(true);
+    toast.success(`Added ${files.length} file(s) to queue`);
+  };
+
+  const processBatch = () => {
+    setBatchQueue((prev) =>
+      prev.map((item) => (item.phase === "idle" ? { ...item, phase: "processing" } : item))
+    );
+    // Simulate processing each item
+    batchQueue.forEach((item, idx) => {
+      if (item.phase !== "idle") return;
+      setTimeout(() => {
+        let p = 0;
+        const iv = setInterval(() => {
+          p += Math.random() * 15 + 5;
+          if (p >= 100) {
+            p = 100;
+            clearInterval(iv);
+            setBatchQueue((prev) =>
+              prev.map((q) => (q.id === item.id ? { ...q, progress: 100, phase: "complete" } : q))
+            );
+            if (user) {
+              supabase.from("colorizations").insert({
+                user_id: user.id,
+                name: item.file.name.replace(/\.[^/.]+$/, ""),
+                source: source === "sentinel1" ? "Sentinel-1" : "Custom",
+                status: "Complete",
+                lat: lat ? parseFloat(lat) : null,
+                lng: lng ? parseFloat(lng) : null,
+              });
+            }
+          } else {
+            setBatchQueue((prev) =>
+              prev.map((q) => (q.id === item.id ? { ...q, progress: p } : q))
+            );
+          }
+        }, 200);
+      }, idx * 1000);
+    });
   };
 
   const simulateProcessing = (fileName: string) => {
@@ -128,13 +194,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
 
   return (
     <section className={embedded ? "py-8 sm:py-12" : "py-20 sm:py-36 relative bg-mesh"}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={currentUpload.accept}
-        onChange={handleFileSelected}
-        className="hidden"
-      />
+      <input ref={fileInputRef} type="file" accept={currentUpload.accept} onChange={handleFileSelected} className="hidden" />
+      <input ref={batchInputRef} type="file" accept={currentUpload.accept} onChange={handleBatchFiles} className="hidden" multiple />
 
       <div className={embedded ? "px-4" : "container mx-auto px-5 sm:px-6"}>
         <motion.div
@@ -155,9 +216,17 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
         <div className="max-w-2xl mx-auto">
           {/* Source Selection */}
           <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease }} className="mb-8 sm:mb-10">
-            <p className="text-xs sm:text-sm font-medium uppercase tracking-[0.15em] text-muted-foreground/60 text-center mb-4 sm:mb-6">
-              Select Input Source
-            </p>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <p className="text-xs sm:text-sm font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
+                Select Input Source
+              </p>
+              <button
+                onClick={() => { setBatchMode(!batchMode); setBatchQueue([]); }}
+                className={`text-[10px] sm:text-xs font-medium px-3 py-1 rounded-full transition-colors ${batchMode ? "bg-primary/10 text-primary" : "bg-foreground/[0.04] text-muted-foreground hover:text-foreground"}`}
+              >
+                {batchMode ? "Single Mode" : "Batch Mode"}
+              </button>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               {sources.map((s, i) => {
                 const selected = source === s.id;
@@ -201,62 +270,115 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
 
           {/* Upload Card */}
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease }} className="max-w-lg mx-auto">
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`glass-card rounded-2xl p-5 sm:p-10 md:p-12 text-center relative overflow-hidden transition-all duration-300 ${isDragging ? "border-primary/50 bg-primary/5 scale-[1.02]" : ""}`}
-            >
-              <div className={`absolute inset-3 sm:inset-5 rounded-xl sm:rounded-2xl border border-dashed pointer-events-none transition-colors duration-300 ${isDragging ? "border-primary/40" : "border-foreground/[0.06]"}`} />
-              <AnimatePresence mode="wait">
-                {phase === "idle" && (
-                  <motion.div key={`idle-${source}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35, ease }} className="relative z-10">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl glass-elevated flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                      {source === "sentinel1" && <Radar size={22} className="text-muted-foreground" />}
-                      {source === "custom" && <Upload size={22} className="text-muted-foreground" />}
-                    </div>
-                    <p className="text-sm sm:text-base text-foreground/90 font-semibold mb-1">{currentUpload.title}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-2">{isDragging ? "Drop your file here" : currentUpload.desc}</p>
-                    {selectedFile && <p className="text-xs text-primary mb-3 sm:mb-4">Selected: {selectedFile.name}</p>}
-                    <Button variant="glow" size="lg" className="rounded-xl sm:rounded-2xl px-6 sm:px-8 h-11 sm:h-12" onClick={startUpload}>Select File</Button>
-                  </motion.div>
-                )}
-                {phase === "scanning" && (
-                  <motion.div key="scanning" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.4, ease }} className="relative z-10 py-6 sm:py-8">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto relative mb-4 sm:mb-6">
-                      <div className="absolute inset-0 rounded-full border border-primary/20" />
-                      <div className="absolute inset-2 rounded-full border border-primary/15" />
-                      <div className="absolute inset-4 rounded-full border border-primary/10" />
-                      <div className="absolute inset-0 animate-scan-rotate"><div className="w-1/2 h-px bg-gradient-to-r from-primary to-transparent absolute top-1/2 left-1/2 origin-left" /></div>
-                      <div className="absolute inset-0 rounded-full border border-primary/30 animate-ring-expand" />
-                      <Radar size={20} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
-                    </div>
-                    <p className="text-sm sm:text-base text-muted-foreground">Scanning data...</p>
-                  </motion.div>
-                )}
-                {phase === "processing" && (
-                  <motion.div key="processing" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35, ease }} className="relative z-10 py-6 sm:py-8">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl glass-elevated flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                      <Radar size={22} className="text-primary animate-pulse-soft" />
-                    </div>
-                    <p className="text-sm sm:text-base text-foreground/90 font-semibold mb-4 sm:mb-5">Colorizing...</p>
-                    <div className="w-full max-w-xs mx-auto h-1.5 sm:h-2 rounded-full bg-secondary overflow-hidden">
-                      <motion.div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.2, ease: "linear" }} />
-                    </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-2 sm:mt-3">{Math.round(progress)}%</p>
-                  </motion.div>
-                )}
-                {phase === "complete" && (
-                  <motion.div key="complete" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.4, ease }} className="relative z-10 py-6 sm:py-8">
-                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                      <Check size={24} className="text-primary" />
+            {!batchMode ? (
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`glass-card rounded-2xl p-5 sm:p-10 md:p-12 text-center relative overflow-hidden transition-all duration-300 ${isDragging ? "border-primary/50 bg-primary/5 scale-[1.02]" : ""}`}
+              >
+                <div className={`absolute inset-3 sm:inset-5 rounded-xl sm:rounded-2xl border border-dashed pointer-events-none transition-colors duration-300 ${isDragging ? "border-primary/40" : "border-foreground/[0.06]"}`} />
+                <AnimatePresence mode="wait">
+                  {phase === "idle" && (
+                    <motion.div key={`idle-${source}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35, ease }} className="relative z-10">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl glass-elevated flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        {source === "sentinel1" && <Radar size={22} className="text-muted-foreground" />}
+                        {source === "custom" && <Upload size={22} className="text-muted-foreground" />}
+                      </div>
+                      <p className="text-sm sm:text-base text-foreground/90 font-semibold mb-1">{currentUpload.title}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-2">{isDragging ? "Drop your file here" : currentUpload.desc}</p>
+                      {selectedFile && <p className="text-xs text-primary mb-3 sm:mb-4">Selected: {selectedFile.name}</p>}
+                      <Button variant="glow" size="lg" className="rounded-xl sm:rounded-2xl px-6 sm:px-8 h-11 sm:h-12" onClick={startUpload}>Select File</Button>
+                      <p className="text-[10px] text-muted-foreground/40 mt-3">or drag & drop</p>
                     </motion.div>
-                    <p className="text-sm sm:text-base text-foreground/90 font-semibold">Colorization Complete</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">Your RGB output is ready</p>
-                  </motion.div>
+                  )}
+                  {phase === "scanning" && (
+                    <motion.div key="scanning" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.4, ease }} className="relative z-10 py-6 sm:py-8">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto relative mb-4 sm:mb-6">
+                        <div className="absolute inset-0 rounded-full border border-primary/20" />
+                        <div className="absolute inset-2 rounded-full border border-primary/15" />
+                        <div className="absolute inset-4 rounded-full border border-primary/10" />
+                        <Radar size={20} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
+                      </div>
+                      <p className="text-sm sm:text-base text-muted-foreground">Scanning data...</p>
+                    </motion.div>
+                  )}
+                  {phase === "processing" && (
+                    <motion.div key="processing" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35, ease }} className="relative z-10 py-6 sm:py-8">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl glass-elevated flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <Radar size={22} className="text-primary animate-pulse" />
+                      </div>
+                      <p className="text-sm sm:text-base text-foreground/90 font-semibold mb-4 sm:mb-5">Colorizing...</p>
+                      <div className="w-full max-w-xs mx-auto h-1.5 sm:h-2 rounded-full bg-secondary overflow-hidden">
+                        <motion.div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.2, ease: "linear" }} />
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-2 sm:mt-3">{Math.round(progress)}%</p>
+                    </motion.div>
+                  )}
+                  {phase === "complete" && (
+                    <motion.div key="complete" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.4, ease }} className="relative z-10 py-6 sm:py-8">
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                        <Check size={24} className="text-primary" />
+                      </motion.div>
+                      <p className="text-sm sm:text-base text-foreground/90 font-semibold">Colorization Complete</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">Your RGB output is ready</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              /* Batch Upload UI */
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`glass-card rounded-2xl p-5 sm:p-8 relative overflow-hidden transition-all duration-300 ${isDragging ? "border-primary/50 bg-primary/5 scale-[1.02]" : ""}`}
+              >
+                <div className="text-center mb-5">
+                  <FileUp size={24} className="mx-auto text-muted-foreground mb-3" />
+                  <p className="text-sm font-semibold">Batch Upload</p>
+                  <p className="text-xs text-muted-foreground">Drag multiple files or click to add</p>
+                </div>
+
+                <Button variant="outline" className="w-full mb-4 rounded-xl" onClick={() => batchInputRef.current?.click()}>
+                  <Plus size={14} className="mr-2" /> Add Files
+                </Button>
+
+                {batchQueue.length > 0 && (
+                  <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
+                    {batchQueue.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 bg-foreground/[0.03] rounded-lg px-3 py-2">
+                        <Radar size={12} className="text-muted-foreground shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium truncate">{item.file.name}</p>
+                          {item.phase === "processing" && (
+                            <div className="w-full h-1 rounded-full bg-secondary mt-1 overflow-hidden">
+                              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${item.progress}%` }} />
+                            </div>
+                          )}
+                        </div>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                          item.phase === "complete" ? "text-emerald-400 bg-emerald-400/10" :
+                          item.phase === "processing" ? "text-amber-400 bg-amber-400/10" :
+                          "text-muted-foreground bg-foreground/[0.04]"
+                        }`}>
+                          {item.phase === "complete" ? "Done" : item.phase === "processing" ? `${Math.round(item.progress)}%` : "Queued"}
+                        </span>
+                        <button onClick={() => setBatchQueue((prev) => prev.filter((q) => q.id !== item.id))} className="text-muted-foreground hover:text-destructive transition-colors">
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </AnimatePresence>
-            </div>
+
+                {batchQueue.some((q) => q.phase === "idle") && (
+                  <Button variant="glow" className="w-full rounded-xl" onClick={processBatch}>
+                    Process {batchQueue.filter((q) => q.phase === "idle").length} Files
+                  </Button>
+                )}
+              </div>
+            )}
 
             {/* Divider */}
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2, ease }} className="flex items-center gap-3 sm:gap-5 my-8 sm:my-10">

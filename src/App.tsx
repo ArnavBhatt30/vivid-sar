@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,18 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
-import AppLayout from "./layouts/AppLayout.tsx";
-import Dashboard from "./pages/Dashboard.tsx";
-import Gallery from "./pages/Gallery.tsx";
-import SettingsPage from "./pages/SettingsPage.tsx";
-import AuthPage from "./pages/AuthPage.tsx";
-import ResearchPage from "./pages/ResearchPage.tsx";
-
-import ApiDocsPage from "./pages/ApiDocsPage.tsx";
-import MapPage from "./pages/MapPage.tsx";
-import ColorizerPage from "./pages/ColorizerPage.tsx";
+import AnimatedRoutes from "@/components/AnimatedRoutes";
+import CommandPalette from "@/components/CommandPalette";
 
 const queryClient = new QueryClient();
 
@@ -32,21 +22,8 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/research" element={<ResearchPage />} />
-              
-              <Route path="/docs" element={<ApiDocsPage />} />
-              <Route element={<AppLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/gallery" element={<Gallery />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/map" element={<MapPage />} />
-                <Route path="/colorizer" element={<ColorizerPage />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <CommandPalette />
+            <AnimatedRoutes />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, DragEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Check, Radar, MapPin, Globe, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,19 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [source, setSource] = useState<Source>("sentinel1");
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e: DragEvent) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent) => { e.preventDefault(); setIsDragging(false); };
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    toast.success(`Selected: ${file.name}`);
+    simulateProcessing(file.name);
+  };
 
   const startUpload = () => {
     fileInputRef.current?.click();
@@ -188,8 +201,13 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
 
           {/* Upload Card */}
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease }} className="max-w-lg mx-auto">
-            <div className="glass-card rounded-2xl p-5 sm:p-10 md:p-12 text-center relative overflow-hidden">
-              <div className="absolute inset-3 sm:inset-5 rounded-xl sm:rounded-2xl border border-dashed border-foreground/[0.06] pointer-events-none" />
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`glass-card rounded-2xl p-5 sm:p-10 md:p-12 text-center relative overflow-hidden transition-all duration-300 ${isDragging ? "border-primary/50 bg-primary/5 scale-[1.02]" : ""}`}
+            >
+              <div className={`absolute inset-3 sm:inset-5 rounded-xl sm:rounded-2xl border border-dashed pointer-events-none transition-colors duration-300 ${isDragging ? "border-primary/40" : "border-foreground/[0.06]"}`} />
               <AnimatePresence mode="wait">
                 {phase === "idle" && (
                   <motion.div key={`idle-${source}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35, ease }} className="relative z-10">
@@ -198,7 +216,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                       {source === "custom" && <Upload size={22} className="text-muted-foreground" />}
                     </div>
                     <p className="text-sm sm:text-base text-foreground/90 font-semibold mb-1">{currentUpload.title}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-2">{currentUpload.desc}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-2">{isDragging ? "Drop your file here" : currentUpload.desc}</p>
                     {selectedFile && <p className="text-xs text-primary mb-3 sm:mb-4">Selected: {selectedFile.name}</p>}
                     <Button variant="glow" size="lg" className="rounded-xl sm:rounded-2xl px-6 sm:px-8 h-11 sm:h-12" onClick={startUpload}>Select File</Button>
                   </motion.div>

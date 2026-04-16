@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Grid3X3, List, Inbox, Trash2 } from "lucide-react";
+import { GallerySkeleton } from "@/components/LoadingSkeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ const Gallery = () => {
   const { user } = useAuth();
   const [items, setItems] = useState<ColorItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
 
@@ -33,6 +35,7 @@ const Gallery = () => {
     if (error) { console.error(error); toast.error("Failed to load gallery"); }
     setItems((data as ColorItem[]) ?? []);
     setLoading(false);
+    setInitialLoad(false);
   };
 
   useEffect(() => { fetchItems(); }, [user]);
@@ -67,8 +70,8 @@ const Gallery = () => {
         </div>
       </motion.div>
 
-      {loading ? (
-        <div className="text-center py-16 sm:py-20 text-muted-foreground text-xs sm:text-sm">Loading...</div>
+      {loading && initialLoad ? (
+        <GallerySkeleton />
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-center">
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-foreground/[0.04] flex items-center justify-center mb-3 sm:mb-4">

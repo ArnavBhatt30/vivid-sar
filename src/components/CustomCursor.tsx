@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 
-const CURSOR_COLOR = "hsl(var(--foreground) / 0.9)";
-
 const CustomCursor = () => {
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const springX = useSpring(x, { stiffness: 500, damping: 34, mass: 0.28 });
-  const springY = useSpring(y, { stiffness: 500, damping: 34, mass: 0.28 });
+  const springX = useSpring(x, { stiffness: 500, damping: 32, mass: 0.3 });
+  const springY = useSpring(y, { stiffness: 500, damping: 32, mass: 0.3 });
 
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -70,57 +68,40 @@ const CustomCursor = () => {
     };
   }, [x, y]);
 
-  const lineLength = hovering ? 22 : 16;
+  const width = textMode ? 3 : hovering ? 18 : 12;
+  const height = textMode ? 20 : hovering ? 18 : 12;
+  const rotation = textMode ? 0 : hovering ? 0 : 45;
+  const radius = textMode ? 999 : 4;
 
   return (
     <motion.div
-      className="pointer-events-none fixed left-0 top-0 z-[9999]"
-      style={{ x: springX, y: springY }}
-      animate={{
-        opacity: visible ? 1 : 0,
-        scale: pressing ? 0.9 : hovering ? 1.06 : 1,
+      className="pointer-events-none fixed top-0 left-0 z-[9999] border border-foreground/20 bg-foreground/80 shadow-[0_10px_30px_hsl(var(--foreground)/0.16)]"
+      style={{
+        x: springX,
+        y: springY,
+        translateX: "-50%",
+        translateY: "-50%",
       }}
-      transition={{ type: "spring", stiffness: 420, damping: 30, mass: 0.32 }}
-    >
-      {textMode ? (
-        <motion.div
-          className="absolute rounded-full"
-          style={{
-            left: -1,
-            top: -11,
-            width: 2,
-            backgroundColor: CURSOR_COLOR,
-          }}
-          animate={{ height: 22 }}
-          transition={{ type: "spring", stiffness: 420, damping: 30 }}
-        />
-      ) : (
-        <>
-          <motion.div
-            className="absolute rounded-full"
-            style={{
-              left: 0,
-              top: 0,
-              width: 2,
-              backgroundColor: CURSOR_COLOR,
-            }}
-            animate={{ height: lineLength }}
-            transition={{ type: "spring", stiffness: 420, damping: 30 }}
-          />
-          <motion.div
-            className="absolute rounded-full"
-            style={{
-              left: 0,
-              top: 0,
-              height: 2,
-              backgroundColor: CURSOR_COLOR,
-            }}
-            animate={{ width: lineLength }}
-            transition={{ type: "spring", stiffness: 420, damping: 30 }}
-          />
-        </>
-      )}
-    </motion.div>
+      animate={{
+        width,
+        height,
+        opacity: visible ? 1 : 0,
+        scale: pressing ? 0.82 : hovering ? 1.12 : 1,
+        rotate: rotation,
+        borderRadius: radius,
+        backgroundColor: textMode
+          ? "hsl(var(--foreground) / 0.9)"
+          : hovering
+            ? "hsl(var(--foreground) / 0.16)"
+            : "hsl(var(--foreground) / 0.8)",
+        borderColor: textMode
+          ? "hsl(var(--foreground) / 0)"
+          : hovering
+            ? "hsl(var(--foreground) / 0.28)"
+            : "hsl(var(--foreground) / 0.2)",
+      }}
+      transition={{ type: "spring", stiffness: 420, damping: 30, mass: 0.35 }}
+    />
   );
 };
 

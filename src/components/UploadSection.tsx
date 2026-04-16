@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, DragEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Check, Radar, MapPin, Globe, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,19 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [source, setSource] = useState<Source>("sentinel1");
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e: DragEvent) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = (e: DragEvent) => { e.preventDefault(); setIsDragging(false); };
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    toast.success(`Selected: ${file.name}`);
+    simulateProcessing(file.name);
+  };
 
   const startUpload = () => {
     fileInputRef.current?.click();

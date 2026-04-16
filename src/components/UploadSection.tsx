@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Check, Radar, MapPin, Globe, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Phase = "idle" | "scanning" | "processing" | "complete";
 type Source = "sentinel1" | "custom";
@@ -19,7 +21,12 @@ const uploadLabels: Record<Source, { title: string; desc: string; accept: string
   custom: { title: "Upload Custom Image", desc: ".tiff, .png, .jpg — max 50MB", accept: ".tiff,.tif,.png,.jpg,.jpeg" },
 };
 
-const UploadSection = () => {
+interface UploadSectionProps {
+  embedded?: boolean;
+}
+
+const UploadSection = ({ embedded }: UploadSectionProps) => {
+  const { user } = useAuth();
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -39,12 +46,11 @@ const UploadSection = () => {
     if (!file) return;
     setSelectedFile(file);
     toast.success(`Selected: ${file.name}`);
-    simulateProcessing();
-    // Reset input so same file can be re-selected
+    simulateProcessing(file.name);
     e.target.value = "";
   };
 
-  const simulateProcessing = () => {
+  const simulateProcessing = (fileName: string) => {
     setPhase("scanning");
     setProgress(0);
     setTimeout(() => {
@@ -56,7 +62,22 @@ const UploadSection = () => {
           p = 100;
           clearInterval(intervalRef.current);
           setProgress(100);
-          setTimeout(() => setPhase("complete"), 400);
+          setTimeout(() => {
+            setPhase("complete");
+            // Save to DB if logged in
+            if (user) {
+              supabase.from("colorizations").insert({
+                user_id: user.id,
+                name: fileName.replace(/\.[^/.]+$/, ""),
+                source: source === "sentinel1" ? "Sentinel-1" : "Custom",
+                status: "Complete",
+                lat: lat ? parseFloat(lat) : null,
+                lng: lng ? parseFloat(lng) : null,
+              }).then(({ error }) => {
+                if (error) console.error("Failed to save colorization:", error);
+              });
+            }
+          }, 400);
           setTimeout(() => { setPhase("idle"); setProgress(0); setSelectedFile(null); }, 3000);
         } else {
           setProgress(p);
@@ -94,8 +115,7 @@ const UploadSection = () => {
   const currentUpload = uploadLabels[source];
 
   return (
-    <section className="py-36 relative bg-mesh">
-      {/* Hidden file input */}
+    <section className={embedded ? "py-12" : "py-36 relative bg-mesh"}>
       <input
         ref={fileInputRef}
         type="file"
@@ -104,7 +124,7 @@ const UploadSection = () => {
         className="hidden"
       />
 
-      <div className="container mx-auto px-6">
+      <div className={embedded ? "px-4" : "container mx-auto px-6"}>
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -113,7 +133,7 @@ const UploadSection = () => {
           className="text-center mb-16"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary/70 mb-5">
-            Try It Now
+            {embedded ? "Colorizer" : "Try It Now"}
           </p>
           <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.04em]">
             Upload SAR Data
@@ -122,13 +142,7 @@ const UploadSection = () => {
 
         <div className="max-w-2xl mx-auto">
           {/* Source Selection */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease }}
-            className="mb-10"
-          >
+          <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease }} className="mb-10">
             <p className="text-sm font-medium uppercase tracking-[0.15em] text-muted-foreground/60 text-center mb-6">
               Select Input Source
             </p>
@@ -153,13 +167,11 @@ const UploadSection = () => {
                     }`}
                   >
                     {s.tag && (
-                     <span className="absolute top-2 right-2 sm:top-3 sm:right-3 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
+                      <span className="absolute top-2 right-2 sm:top-3 sm:right-3 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
                         {s.tag}
                       </span>
                     )}
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 transition-all duration-300 ${
-                      selected ? "bg-primary/15" : "bg-foreground/[0.04]"
-                    }`}>
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 transition-all duration-300 ${selected ? "bg-primary/15" : "bg-foreground/[0.04]"}`}>
                       <Icon size={20} className={`transition-colors duration-300 ${selected ? "text-primary" : "text-muted-foreground"}`} />
                     </div>
                     <p className={`text-base font-semibold tracking-[-0.01em] transition-colors duration-200 ${selected ? "text-foreground" : "text-foreground/80"}`}>
@@ -167,11 +179,7 @@ const UploadSection = () => {
                     </p>
                     <p className="text-sm text-muted-foreground mt-0.5">{s.subtitle}</p>
                     {selected && (
-                      <motion.div
-                        layoutId="source-indicator"
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                      />
+                      <motion.div layoutId="source-indicator" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary" transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                     )}
                   </motion.button>
                 );
@@ -180,13 +188,7 @@ const UploadSection = () => {
           </motion.div>
 
           {/* Upload Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease }}
-            className="max-w-lg mx-auto"
-          >
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease }} className="max-w-lg mx-auto">
             <div className="glass-card rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-12 text-center relative overflow-hidden">
               <div className="absolute inset-5 rounded-2xl border border-dashed border-foreground/[0.06] pointer-events-none" />
               <AnimatePresence mode="wait">
@@ -199,7 +201,6 @@ const UploadSection = () => {
                     <p className="text-base text-foreground/90 font-semibold mb-1.5">{currentUpload.title}</p>
                     <p className="text-sm text-muted-foreground mb-2">{currentUpload.desc}</p>
                     {selectedFile && <p className="text-xs text-primary mb-4">Selected: {selectedFile.name}</p>}
-                    <div className="mb-0" />
                     <Button variant="glow" size="lg" className="rounded-2xl px-8" onClick={startUpload}>Select File</Button>
                   </motion.div>
                 )}

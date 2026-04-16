@@ -70,7 +70,7 @@ const HeroSection = () => {
           >
             <MagneticWrap>
               <Button variant="glow" size="lg" className="group text-base px-10 h-14 rounded-2xl press" asChild>
-                <Link to={user ? "/dashboard" : "/auth"}>
+                <Link to={user ? "/colorizer" : "/auth"}>
                   Try It Out
                   <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>

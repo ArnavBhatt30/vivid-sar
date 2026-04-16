@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Image, Zap, Clock, TrendingUp, Radar, Inbox, Activity, BarChart3, AlertTriangle } from "lucide-react";
+import { Image, Zap, Clock, TrendingUp, Radar, Inbox, Activity, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 
 const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number];
 

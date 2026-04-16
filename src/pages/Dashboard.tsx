@@ -94,8 +94,6 @@ const Dashboard = () => {
   const apiPercent = Math.round((apiUsage.used / apiUsage.limit) * 100);
 
   if (loading) {
-    // Use skeleton
-    const { DashboardSkeleton } = require("@/components/LoadingSkeleton");
     return <DashboardSkeleton />;
   }
 

@@ -216,7 +216,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                       {source === "custom" && <Upload size={22} className="text-muted-foreground" />}
                     </div>
                     <p className="text-sm sm:text-base text-foreground/90 font-semibold mb-1">{currentUpload.title}</p>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-2">{currentUpload.desc}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-2">{isDragging ? "Drop your file here" : currentUpload.desc}</p>
                     {selectedFile && <p className="text-xs text-primary mb-3 sm:mb-4">Selected: {selectedFile.name}</p>}
                     <Button variant="glow" size="lg" className="rounded-xl sm:rounded-2xl px-6 sm:px-8 h-11 sm:h-12" onClick={startUpload}>Select File</Button>
                   </motion.div>

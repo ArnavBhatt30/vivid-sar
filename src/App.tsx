@@ -9,6 +9,7 @@ import CustomCursor from "@/components/CustomCursor";
 import SmoothScroll from "@/components/SmoothScroll";
 import AnimatedRoutes from "@/components/AnimatedRoutes";
 import CommandPalette from "@/components/CommandPalette";
+import OnboardingTour from "@/components/OnboardingTour";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <CommandPalette />
+            <OnboardingTour />
             <AnimatedRoutes />
           </BrowserRouter>
         </TooltipProvider>

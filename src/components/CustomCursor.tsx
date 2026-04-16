@@ -4,13 +4,8 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
 const CustomCursor = () => {
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const ringX = useMotionValue(-100);
-  const ringY = useMotionValue(-100);
-
-  const dotX = useSpring(x, { stiffness: 1500, damping: 60, mass: 0.2 });
-  const dotY = useSpring(y, { stiffness: 1500, damping: 60, mass: 0.2 });
-  const followX = useSpring(ringX, { stiffness: 200, damping: 22, mass: 0.6 });
-  const followY = useSpring(ringY, { stiffness: 200, damping: 22, mass: 0.6 });
+  const springX = useSpring(x, { stiffness: 500, damping: 32, mass: 0.3 });
+  const springY = useSpring(y, { stiffness: 500, damping: 32, mass: 0.3 });
 
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -21,30 +16,37 @@ const CustomCursor = () => {
     const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) return;
 
+    const updateMode = (target: EventTarget | null) => {
+      const element = target as HTMLElement | null;
+
+      if (element?.closest("input, textarea, [contenteditable='true']")) {
+        setTextMode(true);
+        setHovering(false);
+        return;
+      }
+
+      if (element?.closest("a, button, [role='button'], label, summary, select, [data-clickable]")) {
+        setHovering(true);
+        setTextMode(false);
+        return;
+      }
+
+      setHovering(false);
+      setTextMode(false);
+    };
+
     document.documentElement.classList.add("custom-cursor-active");
 
     const move = (e: MouseEvent) => {
       x.set(e.clientX);
       y.set(e.clientY);
-      ringX.set(e.clientX);
-      ringY.set(e.clientY);
-      if (!visible) setVisible(true);
+      setVisible(true);
+      updateMode(e.target);
     };
+
     const down = () => setPressing(true);
     const up = () => setPressing(false);
-    const over = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest("a, button, [role='button'], label, [data-clickable], summary, select")) {
-        setHovering(true);
-        setTextMode(false);
-      } else if (target.closest("input, textarea, [contenteditable='true']")) {
-        setTextMode(true);
-        setHovering(false);
-      } else {
-        setHovering(false);
-        setTextMode(false);
-      }
-    };
+    const over = (e: MouseEvent) => updateMode(e.target);
     const leave = () => setVisible(false);
     const enter = () => setVisible(true);
 
@@ -64,48 +66,42 @@ const CustomCursor = () => {
       document.removeEventListener("mouseleave", leave);
       document.removeEventListener("mouseenter", enter);
     };
-  }, [x, y, ringX, ringY, visible]);
+  }, [x, y]);
 
-  const ringSize = textMode ? 4 : hovering ? 44 : 32;
-  const ringHeight = textMode ? 22 : ringSize;
-  const ringOpacity = visible ? (hovering ? 1 : 0.5) : 0;
-  const dotOpacity = visible && !hovering && !textMode ? 1 : 0;
-  const ringScale = pressing ? 0.85 : 1;
+  const width = textMode ? 3 : hovering ? 18 : 12;
+  const height = textMode ? 20 : hovering ? 18 : 12;
+  const rotation = textMode ? 0 : hovering ? 0 : 45;
+  const radius = textMode ? 999 : 4;
 
   return (
-    <>
-      {/* Outer ring / follower */}
-      <motion.div
-        className="pointer-events-none fixed top-0 left-0 z-[9999] rounded-full border border-primary/70 backdrop-blur-[2px]"
-        style={{
-          x: followX,
-          y: followY,
-          translateX: "-50%",
-          translateY: "-50%",
-        }}
-        animate={{
-          width: ringSize,
-          height: ringHeight,
-          opacity: ringOpacity,
-          scale: ringScale,
-          borderRadius: textMode ? 2 : 999,
-          backgroundColor: hovering ? "hsl(var(--primary) / 0.12)" : "hsl(var(--primary) / 0)",
-        }}
-        transition={{ type: "spring", stiffness: 350, damping: 28, mass: 0.5 }}
-      />
-      {/* Inner dot */}
-      <motion.div
-        className="pointer-events-none fixed top-0 left-0 z-[9999] w-[5px] h-[5px] rounded-full bg-primary"
-        style={{
-          x: dotX,
-          y: dotY,
-          translateX: "-50%",
-          translateY: "-50%",
-        }}
-        animate={{ opacity: dotOpacity, scale: pressing ? 0.6 : 1 }}
-        transition={{ duration: 0.15 }}
-      />
-    </>
+    <motion.div
+      className="pointer-events-none fixed top-0 left-0 z-[9999] border border-foreground/20 bg-foreground/80 shadow-[0_10px_30px_hsl(var(--foreground)/0.16)]"
+      style={{
+        x: springX,
+        y: springY,
+        translateX: "-50%",
+        translateY: "-50%",
+      }}
+      animate={{
+        width,
+        height,
+        opacity: visible ? 1 : 0,
+        scale: pressing ? 0.82 : hovering ? 1.12 : 1,
+        rotate: rotation,
+        borderRadius: radius,
+        backgroundColor: textMode
+          ? "hsl(var(--foreground) / 0.9)"
+          : hovering
+            ? "hsl(var(--foreground) / 0.16)"
+            : "hsl(var(--foreground) / 0.8)",
+        borderColor: textMode
+          ? "hsl(var(--foreground) / 0)"
+          : hovering
+            ? "hsl(var(--foreground) / 0.28)"
+            : "hsl(var(--foreground) / 0.2)",
+      }}
+      transition={{ type: "spring", stiffness: 420, damping: 30, mass: 0.35 }}
+    />
   );
 };
 

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Image, Settings, Home, Map, FileText, Beaker, LogOut } from "lucide-react";
+import { LayoutDashboard, Image, Settings, Home, Map, FileText, Beaker, LogOut, Palette } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +17,7 @@ import {
 const mainItems = [
   { title: "Home", url: "/", icon: Home },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Colorizer", url: "/colorizer", icon: Palette },
   { title: "Gallery", url: "/gallery", icon: Image },
   { title: "Map View", url: "/map", icon: Map },
   { title: "Settings", url: "/settings", icon: Settings },

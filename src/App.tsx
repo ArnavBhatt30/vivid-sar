@@ -18,6 +18,7 @@ import ResearchPage from "./pages/ResearchPage.tsx";
 
 import ApiDocsPage from "./pages/ApiDocsPage.tsx";
 import MapPage from "./pages/MapPage.tsx";
+import ColorizerPage from "./pages/ColorizerPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/map" element={<MapPage />} />
+                <Route path="/colorizer" element={<ColorizerPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

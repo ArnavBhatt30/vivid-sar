@@ -41,13 +41,13 @@ const Navbar = () => {
             : "bg-background/30 backdrop-blur-2xl"
         }`}
       >
-        <nav className="container mx-auto flex h-[4.5rem] items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="relative h-8 w-8">
+        <nav className="container mx-auto flex h-16 sm:h-[4.5rem] items-center justify-between px-5 sm:px-6">
+          <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group">
+            <div className="relative h-7 w-7 sm:h-8 sm:w-8">
               <div className="absolute inset-0 rounded-lg bg-primary/15 group-hover:bg-primary/25 transition-colors duration-400" />
-              <div className="absolute inset-1.5 rounded-md bg-primary" />
+              <div className="absolute inset-1 sm:inset-1.5 rounded-md bg-primary" />
             </div>
-            <span className="text-lg font-semibold tracking-[-0.03em] text-foreground">
+            <span className="text-base sm:text-lg font-semibold tracking-[-0.03em] text-foreground">
               SAR<span className="text-primary">Chroma</span>
             </span>
           </Link>
@@ -87,10 +87,10 @@ const Navbar = () => {
             )}
           </div>
 
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-1.5">
             <ThemeToggle />
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="relative w-11 h-11 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-colors">
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="relative w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-colors">
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </nav>
@@ -99,17 +99,17 @@ const Navbar = () => {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="fixed inset-0 z-40 bg-background/90 backdrop-blur-3xl md:hidden">
-            <motion.nav initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col items-center justify-center h-full gap-3 px-6">
+            <motion.nav initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 12 }} transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }} className="flex flex-col items-center justify-center h-full gap-2 px-6">
               {navLinks.map((item, i) => (
                 <motion.div key={item.label} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: i * 0.05 }}>
                   {item.href.startsWith("#") ? (
-                    <a href={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-5 text-xl font-medium text-foreground/60 hover:text-foreground rounded-2xl hover:bg-foreground/[0.04] transition-all duration-300">{item.label}</a>
+                    <a href={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/60 hover:text-foreground rounded-2xl hover:bg-foreground/[0.04] transition-all duration-300">{item.label}</a>
                   ) : (
-                    <Link to={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-5 text-xl font-medium text-foreground/60 hover:text-foreground rounded-2xl hover:bg-foreground/[0.04] transition-all duration-300">{item.label}</Link>
+                    <Link to={item.href} onClick={() => setMobileOpen(false)} className="block w-full max-w-xs text-center py-4 text-lg font-medium text-foreground/60 hover:text-foreground rounded-2xl hover:bg-foreground/[0.04] transition-all duration-300">{item.label}</Link>
                   )}
                 </motion.div>
               ))}
-              <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: navLinks.length * 0.05 }} className="mt-8">
+              <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: navLinks.length * 0.05 }} className="mt-6">
                 {user ? (
                   <Button variant="glow" size="lg" className="rounded-2xl px-10 text-base" asChild onClick={() => setMobileOpen(false)}>
                     <Link to="/dashboard">Open App</Link>

@@ -1,36 +1,50 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Check, Radar, MapPin, Globe, X, Satellite } from "lucide-react";
+import { Upload, Check, Radar, MapPin, Globe, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 type Phase = "idle" | "scanning" | "processing" | "complete";
-type Source = "sentinel1" | "sentinel2" | "custom";
+type Source = "sentinel1" | "custom";
 
 const ease = [0.25, 0.1, 0.25, 1] as [number, number, number, number];
 
 const sources: { id: Source; label: string; subtitle: string; tag?: string; icon: typeof Radar }[] = [
   { id: "sentinel1", label: "Sentinel-1", subtitle: "Radar (Grayscale)", tag: "Recommended", icon: Radar },
-  { id: "sentinel2", label: "Sentinel-2", subtitle: "Optical RGB", icon: Satellite },
   { id: "custom", label: "Custom Data", subtitle: ".tiff, .png, .jpg", icon: Upload },
 ];
 
-const uploadLabels: Record<Source, { title: string; desc: string }> = {
-  sentinel1: { title: "Upload Sentinel-1 SAR Data", desc: ".tiff, .safe — radar intensity" },
-  sentinel2: { title: "Upload Sentinel-2 Image", desc: ".tiff, .jp2 — optical bands" },
-  custom: { title: "Upload Custom Image", desc: ".tiff, .png, .jpg — max 50MB" },
+const uploadLabels: Record<Source, { title: string; desc: string; accept: string }> = {
+  sentinel1: { title: "Upload Sentinel-1 SAR Data", desc: ".tiff, .safe — radar intensity", accept: ".tiff,.tif,.safe" },
+  custom: { title: "Upload Custom Image", desc: ".tiff, .png, .jpg — max 50MB", accept: ".tiff,.tif,.png,.jpg,.jpeg" },
 };
 
 const UploadSection = () => {
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showCoordInput, setShowCoordInput] = useState(false);
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
   const [source, setSource] = useState<Source>("sentinel1");
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const startUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    toast.success(`Selected: ${file.name}`);
+    simulateProcessing();
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  };
+
+  const simulateProcessing = () => {
     setPhase("scanning");
     setProgress(0);
     setTimeout(() => {
@@ -43,7 +57,7 @@ const UploadSection = () => {
           clearInterval(intervalRef.current);
           setProgress(100);
           setTimeout(() => setPhase("complete"), 400);
-          setTimeout(() => { setPhase("idle"); setProgress(0); }, 3000);
+          setTimeout(() => { setPhase("idle"); setProgress(0); setSelectedFile(null); }, 3000);
         } else {
           setProgress(p);
         }
@@ -55,7 +69,14 @@ const UploadSection = () => {
     if (!navigator.geolocation) { toast.error("Geolocation not supported"); return; }
     toast.info("Fetching your location...");
     navigator.geolocation.getCurrentPosition(
-      (pos) => toast.success(`Location acquired: ${pos.coords.latitude.toFixed(4)}°, ${pos.coords.longitude.toFixed(4)}°`),
+      (pos) => {
+        const latitude = pos.coords.latitude.toFixed(4);
+        const longitude = pos.coords.longitude.toFixed(4);
+        setLat(latitude);
+        setLng(longitude);
+        setShowCoordInput(true);
+        toast.success(`Location acquired: ${latitude}°, ${longitude}°`);
+      },
       () => toast.error("Unable to retrieve location"),
     );
   };
@@ -74,6 +95,15 @@ const UploadSection = () => {
 
   return (
     <section className="py-36 relative bg-mesh">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={currentUpload.accept}
+        onChange={handleFileSelected}
+        className="hidden"
+      />
+
       <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -102,7 +132,7 @@ const UploadSection = () => {
             <p className="text-sm font-medium uppercase tracking-[0.15em] text-muted-foreground/60 text-center mb-6">
               Select Input Source
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {sources.map((s, i) => {
                 const selected = source === s.id;
                 const Icon = s.icon;
@@ -164,11 +194,12 @@ const UploadSection = () => {
                   <motion.div key={`idle-${source}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35, ease }} className="relative z-10">
                     <div className="w-16 h-16 rounded-2xl glass-elevated flex items-center justify-center mx-auto mb-6">
                       {source === "sentinel1" && <Radar size={24} className="text-muted-foreground" />}
-                      {source === "sentinel2" && <Satellite size={24} className="text-muted-foreground" />}
                       {source === "custom" && <Upload size={24} className="text-muted-foreground" />}
                     </div>
                     <p className="text-base text-foreground/90 font-semibold mb-1.5">{currentUpload.title}</p>
-                    <p className="text-sm text-muted-foreground mb-8">{currentUpload.desc}</p>
+                    <p className="text-sm text-muted-foreground mb-2">{currentUpload.desc}</p>
+                    {selectedFile && <p className="text-xs text-primary mb-4">Selected: {selectedFile.name}</p>}
+                    <div className="mb-0" />
                     <Button variant="glow" size="lg" className="rounded-2xl px-8" onClick={startUpload}>Select File</Button>
                   </motion.div>
                 )}

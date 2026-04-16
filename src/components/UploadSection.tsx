@@ -201,8 +201,13 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
 
           {/* Upload Card */}
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, ease }} className="max-w-lg mx-auto">
-            <div className="glass-card rounded-2xl p-5 sm:p-10 md:p-12 text-center relative overflow-hidden">
-              <div className="absolute inset-3 sm:inset-5 rounded-xl sm:rounded-2xl border border-dashed border-foreground/[0.06] pointer-events-none" />
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`glass-card rounded-2xl p-5 sm:p-10 md:p-12 text-center relative overflow-hidden transition-all duration-300 ${isDragging ? "border-primary/50 bg-primary/5 scale-[1.02]" : ""}`}
+            >
+              <div className={`absolute inset-3 sm:inset-5 rounded-xl sm:rounded-2xl border border-dashed pointer-events-none transition-colors duration-300 ${isDragging ? "border-primary/40" : "border-foreground/[0.06]"}`} />
               <AnimatePresence mode="wait">
                 {phase === "idle" && (
                   <motion.div key={`idle-${source}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35, ease }} className="relative z-10">

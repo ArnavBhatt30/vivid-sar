@@ -236,6 +236,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
 
       setProgress(100);
       setResultUrl(colorizedUrl);
+      setComparisonBeforeUrl(colorizedUrl);
       setPhase("complete");
       toast.success("Scene generated — saved to Gallery & Map!");
     } catch (e: any) {

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 
 type Phase = "idle" | "scanning" | "processing" | "complete";
 type Source = "sentinel1" | "custom";

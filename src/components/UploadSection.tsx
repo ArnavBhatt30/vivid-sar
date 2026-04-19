@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 
 type Phase = "idle" | "scanning" | "processing" | "complete";
 type Source = "sentinel1" | "custom";
@@ -442,18 +443,16 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         <Check size={20} className="text-primary" />
                       </motion.div>
                       <p className="text-sm sm:text-base text-foreground/90 font-semibold text-center">Colorization Complete</p>
-                      {resultUrl && (
-                        <div className={`mt-4 sm:mt-5 grid ${originalPreview ? "grid-cols-2" : "grid-cols-1"} gap-2 sm:gap-3`}>
-                          {originalPreview && (
-                            <div className="relative">
-                              <img src={originalPreview} alt="Original" className="w-full aspect-square object-cover rounded-lg sm:rounded-xl border border-border/40" />
-                              <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold bg-black/60 text-white px-1.5 py-0.5 rounded-full">Original</span>
-                            </div>
-                          )}
-                          <div className="relative">
-                            <img src={resultUrl} alt="Colorized" className="w-full aspect-square object-cover rounded-lg sm:rounded-xl border border-primary/40" />
-                            <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold bg-primary/80 text-white px-1.5 py-0.5 rounded-full">AI Colorized</span>
-                          </div>
+                      {resultUrl && originalPreview && (
+                        <div className="mt-4 sm:mt-5">
+                          <BeforeAfterSlider beforeSrc={originalPreview} afterSrc={resultUrl} aspect="aspect-square" />
+                          <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare</p>
+                        </div>
+                      )}
+                      {resultUrl && !originalPreview && (
+                        <div className="mt-4 sm:mt-5 relative">
+                          <img src={resultUrl} alt="Colorized" className="w-full aspect-square object-cover rounded-lg sm:rounded-xl border border-primary/40" />
+                          <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold bg-primary/80 text-white px-1.5 py-0.5 rounded-full">AI Colorized</span>
                         </div>
                       )}
                       <div className="flex items-center justify-center gap-2 mt-4">

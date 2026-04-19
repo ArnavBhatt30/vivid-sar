@@ -73,7 +73,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const [comparisonBeforeUrl, setComparisonBeforeUrl] = useState<string | null>(null);
-  const [zoomed, setZoomed] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState<2 | 3 | 4>(3);
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
   const [breakdownLoading, setBreakdownLoading] = useState(false);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
@@ -179,7 +179,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     setOriginalPreview(URL.createObjectURL(file));
     setComparisonBeforeUrl(null);
     setBreakdown(null);
-    setZoomed(false);
+    setZoomLevel(3);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Processing: ${file.name}`);
@@ -234,7 +234,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     setOriginalPreview(null);
     setComparisonBeforeUrl(null);
     setBreakdown(null);
-    setZoomed(false);
+    setZoomLevel(3);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Generating colorized scene at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
@@ -485,16 +485,21 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                             afterLabel="AI Colorized"
                             beforeImageClassName={originalPreview ? "" : "grayscale contrast-125 brightness-90"}
                             aspect="aspect-square"
-                            zoom={zoomed ? 2 : 1}
+                            zoom={zoomLevel}
                           />
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setZoomed((z) => !z); }}
-                            className="absolute bottom-2 right-2 w-8 h-8 rounded-full glass-elevated flex items-center justify-center text-foreground hover:scale-110 transition-transform z-10"
-                            title={zoomed ? "Reset zoom" : "Zoom 2x"}
-                          >
-                            {zoomed ? <ZoomOut size={14} /> : <ZoomIn size={14} />}
-                          </button>
-                          <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare {zoomed ? "• 2× zoom" : ""}</p>
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1 glass-elevated rounded-full p-1 z-10">
+                            {([2, 3, 4] as const).map((z) => (
+                              <button
+                                key={z}
+                                onClick={(e) => { e.stopPropagation(); setZoomLevel(z); }}
+                                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors ${zoomLevel === z ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                                title={`Zoom ${z}x`}
+                              >
+                                {z}×
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare • {zoomLevel}× zoom</p>
                           <LandCoverBar breakdown={breakdown} loading={breakdownLoading} />
                         </div>
                       )}
@@ -505,7 +510,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         </div>
                       )}
                       <div className="flex items-center justify-center gap-2 mt-4">
-                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); setComparisonBeforeUrl(null); setBreakdown(null); setZoomed(false); }}>
+                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); setComparisonBeforeUrl(null); setBreakdown(null); setZoomLevel(3); }}>
                           New
                         </Button>
                         {resultUrl && (

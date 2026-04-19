@@ -206,6 +206,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     }
     setResultUrl(null);
     setOriginalPreview(null);
+    setComparisonBeforeUrl(null);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Generating colorized scene at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);

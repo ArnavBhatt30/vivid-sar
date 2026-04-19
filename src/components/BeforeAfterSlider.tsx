@@ -8,6 +8,7 @@ interface BeforeAfterSliderProps {
   className?: string;
   aspect?: string;
   beforeImageClassName?: string;
+  zoom?: number;
 }
 
 const BeforeAfterSlider = ({
@@ -18,6 +19,7 @@ const BeforeAfterSlider = ({
   className = "",
   aspect = "aspect-square",
   beforeImageClassName = "",
+  zoom = 1,
 }: BeforeAfterSliderProps) => {
   const [position, setPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -56,9 +58,9 @@ const BeforeAfterSlider = ({
       onTouchStart={(e) => { setIsDragging(true); updatePosition(e.touches[0].clientX); }}
       className={`relative ${aspect} rounded-lg sm:rounded-xl overflow-hidden cursor-col-resize select-none border border-border/40 ${className}`}
     >
-      <img src={afterSrc} alt={afterLabel} className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+      <img src={afterSrc} alt={afterLabel} className="absolute inset-0 w-full h-full object-cover transition-transform duration-300" style={{ transform: `scale(${zoom})`, transformOrigin: "center" }} draggable={false} />
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
-        <img src={beforeSrc} alt={beforeLabel} className={`absolute inset-0 w-full h-full object-cover ${beforeImageClassName}`} draggable={false} />
+        <img src={beforeSrc} alt={beforeLabel} className={`absolute inset-0 w-full h-full object-cover transition-transform duration-300 ${beforeImageClassName}`} style={{ transform: `scale(${zoom})`, transformOrigin: "center" }} draggable={false} />
       </div>
 
       <div className="absolute top-0 bottom-0 w-px bg-foreground/40 pointer-events-none" style={{ left: `${position}%` }}>

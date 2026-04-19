@@ -1,11 +1,16 @@
 import { useState, useRef, DragEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Check, Radar, MapPin, Globe, X, Plus, FileUp } from "lucide-react";
+import { Upload, Check, Radar, MapPin, Globe, X, Plus, FileUp, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
+import LandCoverBar from "@/components/LandCoverBar";
+
+interface Breakdown {
+  urban: number; agriculture: number; rangeland: number; forest: number; water: number; barren: number; unknown: number;
+}
 
 type Phase = "idle" | "scanning" | "processing" | "complete";
 type Source = "sentinel1" | "custom";
@@ -68,6 +73,9 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const [comparisonBeforeUrl, setComparisonBeforeUrl] = useState<string | null>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
+  const [breakdownLoading, setBreakdownLoading] = useState(false);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const batchInputRef = useRef<HTMLInputElement>(null);
@@ -137,6 +145,21 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     return data as { imageBase64: string; mimeType: string };
   };
 
+  const fetchLandcover = async (b64: string, mt: string) => {
+    setBreakdownLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("landcover-analyze", {
+        body: { imageBase64: b64, mimeType: mt },
+      });
+      if (error) throw error;
+      if (data?.breakdown) setBreakdown(data.breakdown as Breakdown);
+    } catch (e) {
+      console.error("landcover failed", e);
+    } finally {
+      setBreakdownLoading(false);
+    }
+  };
+
   const uploadToStorage = async (blob: Blob, path: string) => {
     const { error } = await supabase.storage.from("sar-images").upload(path, blob, {
       contentType: blob.type,
@@ -155,6 +178,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     setResultUrl(null);
     setOriginalPreview(URL.createObjectURL(file));
     setComparisonBeforeUrl(null);
+    setBreakdown(null);
+    setZoomed(false);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Processing: ${file.name}`);
@@ -190,6 +215,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       setResultUrl(colorizedUrl);
       setPhase("complete");
       toast.success("Colorization complete!");
+      void fetchLandcover(result.imageBase64, result.mimeType);
     } catch (e: any) {
       stopProgressTimer();
       console.error(e);
@@ -207,6 +233,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     setResultUrl(null);
     setOriginalPreview(null);
     setComparisonBeforeUrl(null);
+    setBreakdown(null);
+    setZoomed(false);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Generating colorized scene at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
@@ -239,6 +267,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       setComparisonBeforeUrl(colorizedUrl);
       setPhase("complete");
       toast.success("Scene generated — saved to Gallery & Map!");
+      void fetchLandcover(result.imageBase64, result.mimeType);
     } catch (e: any) {
       stopProgressTimer();
       console.error(e);
@@ -448,7 +477,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                       </motion.div>
                       <p className="text-sm sm:text-base text-foreground/90 font-semibold text-center">Colorization Complete</p>
                       {resultUrl && (originalPreview || comparisonBeforeUrl) && (
-                        <div className="mt-4 sm:mt-5">
+                        <div className="mt-4 sm:mt-5 relative">
                           <BeforeAfterSlider
                             beforeSrc={originalPreview || comparisonBeforeUrl || resultUrl}
                             afterSrc={resultUrl}
@@ -456,8 +485,17 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                             afterLabel="AI Colorized"
                             beforeImageClassName={originalPreview ? "" : "grayscale contrast-125 brightness-90"}
                             aspect="aspect-square"
+                            zoom={zoomed ? 2 : 1}
                           />
-                          <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare</p>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setZoomed((z) => !z); }}
+                            className="absolute bottom-2 right-2 w-8 h-8 rounded-full glass-elevated flex items-center justify-center text-foreground hover:scale-110 transition-transform z-10"
+                            title={zoomed ? "Reset zoom" : "Zoom 2x"}
+                          >
+                            {zoomed ? <ZoomOut size={14} /> : <ZoomIn size={14} />}
+                          </button>
+                          <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare {zoomed ? "• 2× zoom" : ""}</p>
+                          <LandCoverBar breakdown={breakdown} loading={breakdownLoading} />
                         </div>
                       )}
                       {resultUrl && !originalPreview && !comparisonBeforeUrl && (
@@ -467,7 +505,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         </div>
                       )}
                       <div className="flex items-center justify-center gap-2 mt-4">
-                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); }}>
+                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); setComparisonBeforeUrl(null); setBreakdown(null); setZoomed(false); }}>
                           New
                         </Button>
                         {resultUrl && (

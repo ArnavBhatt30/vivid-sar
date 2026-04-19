@@ -150,6 +150,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       toast.error("Please sign in to colorize images");
       return;
     }
+    setResultUrl(null);
+    setOriginalPreview(URL.createObjectURL(file));
     setPhase("scanning");
     setProgress(0);
     toast.info(`Processing: ${file.name}`);
@@ -182,9 +184,9 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       });
 
       setProgress(100);
+      setResultUrl(colorizedUrl);
       setPhase("complete");
       toast.success("Colorization complete!");
-      setTimeout(() => { setPhase("idle"); setProgress(0); setSelectedFile(null); }, 2800);
     } catch (e: any) {
       stopProgressTimer();
       console.error(e);

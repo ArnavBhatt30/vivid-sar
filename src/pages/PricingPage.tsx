@@ -117,12 +117,12 @@ const PricingPage = () => {
       </section>
 
       {/* FAQ */}
-      <section className="py-20 bg-mesh">
-        <div className="container mx-auto px-6">
-          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease }} className="text-center mb-12">
+      <section className="py-16 sm:py-20 bg-mesh">
+        <div className="container mx-auto px-5 sm:px-6">
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease }} className="text-center mb-10 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.03em]">Frequently Asked Questions</h2>
           </motion.div>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+          <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto">
             {faqs.map((faq, i) => (
               <motion.div
                 key={faq.q}
@@ -130,10 +130,10 @@ const PricingPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08, ease }}
-                className="glass-elevated rounded-xl p-5"
+                className="glass-elevated rounded-xl p-4 sm:p-5"
               >
                 <p className="text-sm font-semibold mb-2">{faq.q}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{faq.a}</p>
+                <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed">{faq.a}</p>
               </motion.div>
             ))}
           </div>

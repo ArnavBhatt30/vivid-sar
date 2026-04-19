@@ -17,8 +17,8 @@ const sources: { id: Source; label: string; subtitle: string; tag?: string; icon
 ];
 
 const uploadLabels: Record<Source, { title: string; desc: string; accept: string }> = {
-  sentinel1: { title: "Upload Sentinel-1 SAR Data", desc: ".tiff, .safe — radar intensity", accept: ".tiff,.tif,.safe" },
-  custom: { title: "Upload Custom Image", desc: ".tiff, .png, .jpg — max 50MB", accept: ".tiff,.tif,.png,.jpg,.jpeg" },
+  sentinel1: { title: "Upload Sentinel-1 SAR Data", desc: ".tiff, .png, .jpg — radar intensity", accept: ".tiff,.tif,.png,.jpg,.jpeg" },
+  custom: { title: "Upload Custom Image", desc: ".tiff, .png, .jpg — max 10MB", accept: ".tiff,.tif,.png,.jpg,.jpeg" },
 };
 
 interface UploadSectionProps {
@@ -32,6 +32,26 @@ interface QueueItem {
   phase: Phase;
 }
 
+const fileToBase64 = (file: File): Promise<{ b64: string; mime: string }> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const [meta, b64] = result.split(",");
+      const mime = /data:([^;]+)/.exec(meta)?.[1] ?? file.type ?? "image/png";
+      resolve({ b64, mime });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const base64ToBlob = (b64: string, mime: string): Blob => {
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+};
+
 const UploadSection = ({ embedded }: UploadSectionProps) => {
   const { user } = useAuth();
   const [phase, setPhase] = useState<Phase>("idle");
@@ -44,7 +64,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [batchMode, setBatchMode] = useState(false);
   const [batchQueue, setBatchQueue] = useState<QueueItem[]>([]);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const batchInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,8 +78,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       addToBatch(files);
     } else if (files[0]) {
       setSelectedFile(files[0]);
-      toast.success(`Selected: ${files[0].name}`);
-      simulateProcessing(files[0].name);
+      void runColorization(files[0]);
     }
   };
 
@@ -69,8 +88,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setSelectedFile(file);
-    toast.success(`Selected: ${file.name}`);
-    simulateProcessing(file.name);
+    void runColorization(file);
     e.target.value = "";
   };
 
@@ -92,76 +110,170 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     toast.success(`Added ${files.length} file(s) to queue`);
   };
 
-  const processBatch = () => {
-    setBatchQueue((prev) =>
-      prev.map((item) => (item.phase === "idle" ? { ...item, phase: "processing" } : item))
-    );
-    // Simulate processing each item
-    batchQueue.forEach((item, idx) => {
-      if (item.phase !== "idle") return;
-      setTimeout(() => {
-        let p = 0;
-        const iv = setInterval(() => {
-          p += Math.random() * 15 + 5;
-          if (p >= 100) {
-            p = 100;
-            clearInterval(iv);
-            setBatchQueue((prev) =>
-              prev.map((q) => (q.id === item.id ? { ...q, progress: 100, phase: "complete" } : q))
-            );
-            if (user) {
-              supabase.from("colorizations").insert({
-                user_id: user.id,
-                name: item.file.name.replace(/\.[^/.]+$/, ""),
-                source: source === "sentinel1" ? "Sentinel-1" : "Custom",
-                status: "Complete",
-                lat: lat ? parseFloat(lat) : null,
-                lng: lng ? parseFloat(lng) : null,
-              });
-            }
-          } else {
-            setBatchQueue((prev) =>
-              prev.map((q) => (q.id === item.id ? { ...q, progress: p } : q))
-            );
-          }
-        }, 200);
-      }, idx * 1000);
-    });
+  // Animate a fake progress bar while the AI call runs
+  const startProgressTimer = (onTick: (p: number) => void) => {
+    let p = 0;
+    progressTimerRef.current = setInterval(() => {
+      p += Math.random() * 4 + 2;
+      if (p >= 92) p = 92;
+      onTick(p);
+    }, 250);
+  };
+  const stopProgressTimer = () => {
+    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
   };
 
-  const simulateProcessing = (fileName: string) => {
+  // ---- CORE: call the colorize-sar edge function ----
+  const callColorizer = async (
+    payload: { imageBase64?: string; mimeType?: string; lat?: number; lng?: number },
+  ) => {
+    const { data, error } = await supabase.functions.invoke("colorize-sar", { body: payload });
+    if (error) throw new Error(error.message || "Colorization failed");
+    if (!data?.imageBase64) throw new Error(data?.error || "No image returned");
+    return data as { imageBase64: string; mimeType: string };
+  };
+
+  const uploadToStorage = async (blob: Blob, path: string) => {
+    const { error } = await supabase.storage.from("sar-images").upload(path, blob, {
+      contentType: blob.type,
+      upsert: true,
+    });
+    if (error) throw error;
+    const { data } = supabase.storage.from("sar-images").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const runColorization = async (file: File) => {
+    if (!user) {
+      toast.error("Please sign in to colorize images");
+      return;
+    }
     setPhase("scanning");
     setProgress(0);
-    setTimeout(() => {
+    toast.info(`Processing: ${file.name}`);
+
+    try {
+      const { b64, mime } = await fileToBase64(file);
       setPhase("processing");
-      let p = 0;
-      intervalRef.current = setInterval(() => {
-        p += Math.random() * 12 + 3;
-        if (p >= 100) {
-          p = 100;
-          clearInterval(intervalRef.current);
-          setProgress(100);
-          setTimeout(() => {
-            setPhase("complete");
-            if (user) {
-              supabase.from("colorizations").insert({
-                user_id: user.id,
-                name: fileName.replace(/\.[^/.]+$/, ""),
-                source: source === "sentinel1" ? "Sentinel-1" : "Custom",
-                status: "Complete",
-                lat: lat ? parseFloat(lat) : null,
-                lng: lng ? parseFloat(lng) : null,
-              }).then(({ error }) => {
-                if (error) console.error("Failed to save colorization:", error);
-              });
-            }
-          }, 400);
-          setTimeout(() => { setPhase("idle"); setProgress(0); setSelectedFile(null); }, 3000);
-        } else {
-          setProgress(p);
+      startProgressTimer(setProgress);
+
+      const result = await callColorizer({ imageBase64: b64, mimeType: mime });
+      stopProgressTimer();
+      setProgress(96);
+
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      const ts = Date.now();
+      const originalUrl = await uploadToStorage(file, `${user.id}/${ts}-original-${file.name}`);
+      const colorBlob = base64ToBlob(result.imageBase64, result.mimeType);
+      const ext = result.mimeType.split("/")[1] ?? "png";
+      const colorizedUrl = await uploadToStorage(colorBlob, `${user.id}/${ts}-colorized.${ext}`);
+
+      await supabase.from("colorizations").insert({
+        user_id: user.id,
+        name: baseName,
+        source: source === "sentinel1" ? "Sentinel-1" : "Custom",
+        status: "Complete",
+        original_url: originalUrl,
+        colorized_url: colorizedUrl,
+        lat: lat ? parseFloat(lat) : null,
+        lng: lng ? parseFloat(lng) : null,
+      });
+
+      setProgress(100);
+      setPhase("complete");
+      toast.success("Colorization complete!");
+      setTimeout(() => { setPhase("idle"); setProgress(0); setSelectedFile(null); }, 2800);
+    } catch (e: any) {
+      stopProgressTimer();
+      console.error(e);
+      toast.error(e?.message || "Colorization failed");
+      setPhase("idle");
+      setProgress(0);
+    }
+  };
+
+  const runColorizationFromCoords = async (latNum: number, lngNum: number) => {
+    if (!user) {
+      toast.error("Please sign in to generate colorized scenes");
+      return;
+    }
+    setPhase("scanning");
+    setProgress(0);
+    toast.info(`Generating colorized scene at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
+
+    try {
+      setPhase("processing");
+      startProgressTimer(setProgress);
+
+      const result = await callColorizer({ lat: latNum, lng: lngNum });
+      stopProgressTimer();
+      setProgress(96);
+
+      const ts = Date.now();
+      const colorBlob = base64ToBlob(result.imageBase64, result.mimeType);
+      const ext = result.mimeType.split("/")[1] ?? "png";
+      const colorizedUrl = await uploadToStorage(colorBlob, `${user.id}/${ts}-colorized.${ext}`);
+
+      await supabase.from("colorizations").insert({
+        user_id: user.id,
+        name: `Scene @ ${latNum.toFixed(3)}, ${lngNum.toFixed(3)}`,
+        source: source === "sentinel1" ? "Sentinel-1" : "Custom",
+        status: "Complete",
+        colorized_url: colorizedUrl,
+        lat: latNum,
+        lng: lngNum,
+      });
+
+      setProgress(100);
+      setPhase("complete");
+      toast.success("Scene generated and added to map!");
+      setTimeout(() => { setPhase("idle"); setProgress(0); }, 2800);
+    } catch (e: any) {
+      stopProgressTimer();
+      console.error(e);
+      toast.error(e?.message || "Generation failed");
+      setPhase("idle");
+      setProgress(0);
+    }
+  };
+
+  const processBatch = () => {
+    const queued = batchQueue.filter((q) => q.phase === "idle");
+    queued.forEach((item, idx) => {
+      setTimeout(async () => {
+        setBatchQueue((prev) => prev.map((q) => q.id === item.id ? { ...q, phase: "processing", progress: 10 } : q));
+        try {
+          const { b64, mime } = await fileToBase64(item.file);
+          setBatchQueue((prev) => prev.map((q) => q.id === item.id ? { ...q, progress: 40 } : q));
+          const result = await callColorizer({ imageBase64: b64, mimeType: mime });
+          setBatchQueue((prev) => prev.map((q) => q.id === item.id ? { ...q, progress: 75 } : q));
+
+          const baseName = item.file.name.replace(/\.[^/.]+$/, "");
+          const ts = Date.now();
+          const originalUrl = await uploadToStorage(item.file, `${user!.id}/${ts}-original-${item.file.name}`);
+          const colorBlob = base64ToBlob(result.imageBase64, result.mimeType);
+          const ext = result.mimeType.split("/")[1] ?? "png";
+          const colorizedUrl = await uploadToStorage(colorBlob, `${user!.id}/${ts}-colorized.${ext}`);
+
+          await supabase.from("colorizations").insert({
+            user_id: user!.id,
+            name: baseName,
+            source: source === "sentinel1" ? "Sentinel-1" : "Custom",
+            status: "Complete",
+            original_url: originalUrl,
+            colorized_url: colorizedUrl,
+            lat: lat ? parseFloat(lat) : null,
+            lng: lng ? parseFloat(lng) : null,
+          });
+
+          setBatchQueue((prev) => prev.map((q) => q.id === item.id ? { ...q, progress: 100, phase: "complete" } : q));
+        } catch (e: any) {
+          console.error(e);
+          toast.error(`${item.file.name}: ${e?.message || "failed"}`);
+          setBatchQueue((prev) => prev.map((q) => q.id === item.id ? { ...q, phase: "idle", progress: 0 } : q));
         }
-      }, 200);
-    }, 2000);
+      }, idx * 600);
+    });
   };
 
   const handleCurrentLocation = () => {
@@ -169,12 +281,12 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     toast.info("Fetching your location...");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const latitude = pos.coords.latitude.toFixed(4);
-        const longitude = pos.coords.longitude.toFixed(4);
-        setLat(latitude);
-        setLng(longitude);
-        setShowCoordInput(true);
+        const latitude = +pos.coords.latitude.toFixed(4);
+        const longitude = +pos.coords.longitude.toFixed(4);
+        setLat(String(latitude));
+        setLng(String(longitude));
         toast.success(`Location acquired: ${latitude}°, ${longitude}°`);
+        void runColorizationFromCoords(latitude, longitude);
       },
       () => toast.error("Unable to retrieve location"),
     );
@@ -186,8 +298,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     if (isNaN(latNum) || isNaN(lngNum) || latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
       toast.error("Please enter valid coordinates"); return;
     }
-    toast.success(`Segmenting at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
-    setShowCoordInput(false); setLat(""); setLng("");
+    setShowCoordInput(false);
+    void runColorizationFromCoords(latNum, lngNum);
   };
 
   const currentUpload = uploadLabels[source];
@@ -211,6 +323,9 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
           <h2 className="text-3xl sm:text-5xl font-bold tracking-[-0.04em]">
             Upload SAR Data
           </h2>
+          <p className="text-sm text-muted-foreground mt-3 max-w-md mx-auto">
+            Powered by Lovable AI — drop a SAR image or pick coordinates and we'll generate a colorized RGB output.
+          </p>
         </motion.div>
 
         <div className="max-w-2xl mx-auto">
@@ -295,12 +410,12 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                   {phase === "scanning" && (
                     <motion.div key="scanning" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.4, ease }} className="relative z-10 py-6 sm:py-8">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto relative mb-4 sm:mb-6">
-                        <div className="absolute inset-0 rounded-full border border-primary/20" />
-                        <div className="absolute inset-2 rounded-full border border-primary/15" />
-                        <div className="absolute inset-4 rounded-full border border-primary/10" />
+                        <div className="absolute inset-0 rounded-full border border-primary/20 animate-pulse" />
+                        <div className="absolute inset-2 rounded-full border border-primary/15 animate-pulse" />
+                        <div className="absolute inset-4 rounded-full border border-primary/10 animate-pulse" />
                         <Radar size={20} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
                       </div>
-                      <p className="text-sm sm:text-base text-muted-foreground">Scanning data...</p>
+                      <p className="text-sm sm:text-base text-muted-foreground">Preparing data...</p>
                     </motion.div>
                   )}
                   {phase === "processing" && (
@@ -308,7 +423,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                       <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl glass-elevated flex items-center justify-center mx-auto mb-4 sm:mb-6">
                         <Radar size={22} className="text-primary animate-pulse" />
                       </div>
-                      <p className="text-sm sm:text-base text-foreground/90 font-semibold mb-4 sm:mb-5">Colorizing...</p>
+                      <p className="text-sm sm:text-base text-foreground/90 font-semibold mb-4 sm:mb-5">AI is colorizing...</p>
                       <div className="w-full max-w-xs mx-auto h-1.5 sm:h-2 rounded-full bg-secondary overflow-hidden">
                         <motion.div className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.2, ease: "linear" }} />
                       </div>
@@ -321,7 +436,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         <Check size={24} className="text-primary" />
                       </motion.div>
                       <p className="text-sm sm:text-base text-foreground/90 font-semibold">Colorization Complete</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">Your RGB output is ready</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">Saved to Gallery and Map</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -383,7 +498,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
             {/* Divider */}
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2, ease }} className="flex items-center gap-3 sm:gap-5 my-8 sm:my-10">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-foreground/8 to-transparent" />
-              <span className="text-xs sm:text-sm font-medium uppercase tracking-[0.1em] sm:tracking-[0.15em] text-muted-foreground/50 whitespace-nowrap">Or Segment by Location</span>
+              <span className="text-xs sm:text-sm font-medium uppercase tracking-[0.1em] sm:tracking-[0.15em] text-muted-foreground/50 whitespace-nowrap">Or Generate by Location</span>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-foreground/8 to-transparent" />
             </motion.div>
 
@@ -419,7 +534,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         <input type="number" step="any" placeholder="e.g. 77.2090" value={lng} onChange={(e) => setLng(e.target.value)} className="w-full h-10 sm:h-12 rounded-lg sm:rounded-xl bg-secondary/60 border border-border/40 px-3 sm:px-4 text-sm sm:text-base text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all duration-200" />
                       </div>
                     </div>
-                    <Button variant="glow" size="lg" className="w-full rounded-lg sm:rounded-xl h-11 sm:h-12" onClick={handleCoordSubmit}>Start Segmentation</Button>
+                    <Button variant="glow" size="lg" className="w-full rounded-lg sm:rounded-xl h-11 sm:h-12" onClick={handleCoordSubmit}>Generate Colorized Scene</Button>
                   </div>
                 </motion.div>
               )}

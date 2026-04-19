@@ -73,6 +73,9 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const [comparisonBeforeUrl, setComparisonBeforeUrl] = useState<string | null>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
+  const [breakdownLoading, setBreakdownLoading] = useState(false);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const batchInputRef = useRef<HTMLInputElement>(null);

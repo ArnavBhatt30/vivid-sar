@@ -11,6 +11,7 @@ import ResearchPage from "@/pages/ResearchPage";
 import ApiDocsPage from "@/pages/ApiDocsPage";
 import MapPage from "@/pages/MapPage";
 import ColorizerPage from "@/pages/ColorizerPage";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -42,7 +43,7 @@ const AnimatedRoutes = () => {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/research" element={<ResearchPage />} />
           <Route path="/docs" element={<ApiDocsPage />} />
-          <Route element={<AppLayout />}>
+          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/settings" element={<SettingsPage />} />

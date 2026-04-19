@@ -215,6 +215,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       setResultUrl(colorizedUrl);
       setPhase("complete");
       toast.success("Colorization complete!");
+      void fetchLandcover(result.imageBase64, result.mimeType);
     } catch (e: any) {
       stopProgressTimer();
       console.error(e);

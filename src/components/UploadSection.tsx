@@ -201,6 +201,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       toast.error("Please sign in to generate colorized scenes");
       return;
     }
+    setResultUrl(null);
+    setOriginalPreview(null);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Generating colorized scene at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
@@ -229,9 +231,9 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       });
 
       setProgress(100);
+      setResultUrl(colorizedUrl);
       setPhase("complete");
-      toast.success("Scene generated and added to map!");
-      setTimeout(() => { setPhase("idle"); setProgress(0); }, 2800);
+      toast.success("Scene generated — saved to Gallery & Map!");
     } catch (e: any) {
       stopProgressTimer();
       console.error(e);

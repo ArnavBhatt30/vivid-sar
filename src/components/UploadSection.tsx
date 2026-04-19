@@ -267,6 +267,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       setComparisonBeforeUrl(colorizedUrl);
       setPhase("complete");
       toast.success("Scene generated — saved to Gallery & Map!");
+      void fetchLandcover(result.imageBase64, result.mimeType);
     } catch (e: any) {
       stopProgressTimer();
       console.error(e);

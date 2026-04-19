@@ -6,6 +6,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
+import LandCoverBar from "@/components/LandCoverBar";
+
+interface Breakdown {
+  urban: number; agriculture: number; rangeland: number; forest: number; water: number; barren: number; unknown: number;
+}
 
 type Phase = "idle" | "scanning" | "processing" | "complete";
 type Source = "sentinel1" | "custom";

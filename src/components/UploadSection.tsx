@@ -477,7 +477,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                       </motion.div>
                       <p className="text-sm sm:text-base text-foreground/90 font-semibold text-center">Colorization Complete</p>
                       {resultUrl && (originalPreview || comparisonBeforeUrl) && (
-                        <div className="mt-4 sm:mt-5">
+                        <div className="mt-4 sm:mt-5 relative">
                           <BeforeAfterSlider
                             beforeSrc={originalPreview || comparisonBeforeUrl || resultUrl}
                             afterSrc={resultUrl}
@@ -485,8 +485,17 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                             afterLabel="AI Colorized"
                             beforeImageClassName={originalPreview ? "" : "grayscale contrast-125 brightness-90"}
                             aspect="aspect-square"
+                            zoom={zoomed ? 2 : 1}
                           />
-                          <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare</p>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setZoomed((z) => !z); }}
+                            className="absolute bottom-2 right-2 w-8 h-8 rounded-full glass-elevated flex items-center justify-center text-foreground hover:scale-110 transition-transform z-10"
+                            title={zoomed ? "Reset zoom" : "Zoom 2x"}
+                          >
+                            {zoomed ? <ZoomOut size={14} /> : <ZoomIn size={14} />}
+                          </button>
+                          <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare {zoomed ? "• 2× zoom" : ""}</p>
+                          <LandCoverBar breakdown={breakdown} loading={breakdownLoading} />
                         </div>
                       )}
                       {resultUrl && !originalPreview && !comparisonBeforeUrl && (
@@ -496,7 +505,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         </div>
                       )}
                       <div className="flex items-center justify-center gap-2 mt-4">
-                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); }}>
+                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); setComparisonBeforeUrl(null); setBreakdown(null); setZoomed(false); }}>
                           New
                         </Button>
                         {resultUrl && (

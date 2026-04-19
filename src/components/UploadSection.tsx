@@ -447,13 +447,20 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         <Check size={20} className="text-primary" />
                       </motion.div>
                       <p className="text-sm sm:text-base text-foreground/90 font-semibold text-center">Colorization Complete</p>
-                      {resultUrl && originalPreview && (
+                      {resultUrl && (originalPreview || comparisonBeforeUrl) && (
                         <div className="mt-4 sm:mt-5">
-                          <BeforeAfterSlider beforeSrc={originalPreview} afterSrc={resultUrl} aspect="aspect-square" />
+                          <BeforeAfterSlider
+                            beforeSrc={originalPreview || comparisonBeforeUrl || resultUrl}
+                            afterSrc={resultUrl}
+                            beforeLabel={originalPreview ? "Original" : "SAR Preview"}
+                            afterLabel="AI Colorized"
+                            beforeImageClassName={originalPreview ? "" : "grayscale contrast-125 brightness-90"}
+                            aspect="aspect-square"
+                          />
                           <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare</p>
                         </div>
                       )}
-                      {resultUrl && !originalPreview && (
+                      {resultUrl && !originalPreview && !comparisonBeforeUrl && (
                         <div className="mt-4 sm:mt-5 relative">
                           <img src={resultUrl} alt="Colorized" className="w-full aspect-square object-cover rounded-lg sm:rounded-xl border border-primary/40" />
                           <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold bg-primary/80 text-white px-1.5 py-0.5 rounded-full">AI Colorized</span>

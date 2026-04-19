@@ -64,6 +64,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [batchMode, setBatchMode] = useState(false);
   const [batchQueue, setBatchQueue] = useState<QueueItem[]>([]);
+  const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const batchInputRef = useRef<HTMLInputElement>(null);
@@ -148,6 +150,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       toast.error("Please sign in to colorize images");
       return;
     }
+    setResultUrl(null);
+    setOriginalPreview(URL.createObjectURL(file));
     setPhase("scanning");
     setProgress(0);
     toast.info(`Processing: ${file.name}`);
@@ -180,9 +184,9 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       });
 
       setProgress(100);
+      setResultUrl(colorizedUrl);
       setPhase("complete");
       toast.success("Colorization complete!");
-      setTimeout(() => { setPhase("idle"); setProgress(0); setSelectedFile(null); }, 2800);
     } catch (e: any) {
       stopProgressTimer();
       console.error(e);
@@ -197,6 +201,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       toast.error("Please sign in to generate colorized scenes");
       return;
     }
+    setResultUrl(null);
+    setOriginalPreview(null);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Generating colorized scene at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
@@ -225,9 +231,9 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
       });
 
       setProgress(100);
+      setResultUrl(colorizedUrl);
       setPhase("complete");
-      toast.success("Scene generated and added to map!");
-      setTimeout(() => { setPhase("idle"); setProgress(0); }, 2800);
+      toast.success("Scene generated — saved to Gallery & Map!");
     } catch (e: any) {
       stopProgressTimer();
       console.error(e);
@@ -431,12 +437,35 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                     </motion.div>
                   )}
                   {phase === "complete" && (
-                    <motion.div key="complete" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.4, ease }} className="relative z-10 py-6 sm:py-8">
-                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                        <Check size={24} className="text-primary" />
+                    <motion.div key="complete" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.4, ease }} className="relative z-10 py-2">
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }} className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-3">
+                        <Check size={20} className="text-primary" />
                       </motion.div>
-                      <p className="text-sm sm:text-base text-foreground/90 font-semibold">Colorization Complete</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">Saved to Gallery and Map</p>
+                      <p className="text-sm sm:text-base text-foreground/90 font-semibold text-center">Colorization Complete</p>
+                      {resultUrl && (
+                        <div className={`mt-4 sm:mt-5 grid ${originalPreview ? "grid-cols-2" : "grid-cols-1"} gap-2 sm:gap-3`}>
+                          {originalPreview && (
+                            <div className="relative">
+                              <img src={originalPreview} alt="Original" className="w-full aspect-square object-cover rounded-lg sm:rounded-xl border border-border/40" />
+                              <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold bg-black/60 text-white px-1.5 py-0.5 rounded-full">Original</span>
+                            </div>
+                          )}
+                          <div className="relative">
+                            <img src={resultUrl} alt="Colorized" className="w-full aspect-square object-cover rounded-lg sm:rounded-xl border border-primary/40" />
+                            <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold bg-primary/80 text-white px-1.5 py-0.5 rounded-full">AI Colorized</span>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-center gap-2 mt-4">
+                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); }}>
+                          New
+                        </Button>
+                        {resultUrl && (
+                          <Button variant="glow" size="sm" className="rounded-lg" onClick={() => { const a = document.createElement("a"); a.href = resultUrl; a.download = "colorized.png"; a.click(); }}>
+                            Download
+                          </Button>
+                        )}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>

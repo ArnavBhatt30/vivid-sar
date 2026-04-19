@@ -73,7 +73,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const [comparisonBeforeUrl, setComparisonBeforeUrl] = useState<string | null>(null);
-  const [zoomLevel, setZoomLevel] = useState<2 | 3 | 4>(3);
+  const [zoomLevel, setZoomLevel] = useState<1 | 2 | 3 | 4>(3);
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
   const [breakdownLoading, setBreakdownLoading] = useState(false);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
@@ -488,7 +488,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                             zoom={zoomLevel}
                           />
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 glass-elevated rounded-full p-1 z-10">
-                            {([2, 3, 4] as const).map((z) => (
+                            {([1, 2, 3, 4] as const).map((z) => (
                               <button
                                 key={z}
                                 onClick={(e) => { e.stopPropagation(); setZoomLevel(z); }}

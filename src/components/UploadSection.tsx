@@ -73,7 +73,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const [comparisonBeforeUrl, setComparisonBeforeUrl] = useState<string | null>(null);
-  const [zoomLevel, setZoomLevel] = useState<1 | 2 | 3 | 4>(3);
+  const [zoomLevel, setZoomLevel] = useState<1 | 2 | 3 | 4>(1);
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
   const [breakdownLoading, setBreakdownLoading] = useState(false);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
@@ -179,7 +179,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     setOriginalPreview(URL.createObjectURL(file));
     setComparisonBeforeUrl(null);
     setBreakdown(null);
-    setZoomLevel(3);
+    setZoomLevel(1);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Processing: ${file.name}`);
@@ -234,7 +234,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     setOriginalPreview(null);
     setComparisonBeforeUrl(null);
     setBreakdown(null);
-    setZoomLevel(3);
+    setZoomLevel(1);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Generating colorized scene at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
@@ -510,7 +510,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         </div>
                       )}
                       <div className="flex items-center justify-center gap-2 mt-4">
-                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); setComparisonBeforeUrl(null); setBreakdown(null); setZoomLevel(3); }}>
+                        <Button variant="outline" size="sm" className="rounded-lg" onClick={() => { setPhase("idle"); setProgress(0); setSelectedFile(null); setResultUrl(null); setOriginalPreview(null); setComparisonBeforeUrl(null); setBreakdown(null); setZoomLevel(1); }}>
                           New
                         </Button>
                         {resultUrl && (

@@ -178,6 +178,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     setResultUrl(null);
     setOriginalPreview(URL.createObjectURL(file));
     setComparisonBeforeUrl(null);
+    setBreakdown(null);
+    setZoomed(false);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Processing: ${file.name}`);

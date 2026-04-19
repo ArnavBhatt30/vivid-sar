@@ -67,6 +67,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [batchQueue, setBatchQueue] = useState<QueueItem[]>([]);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [originalPreview, setOriginalPreview] = useState<string | null>(null);
+  const [comparisonBeforeUrl, setComparisonBeforeUrl] = useState<string | null>(null);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const batchInputRef = useRef<HTMLInputElement>(null);
@@ -153,6 +154,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     }
     setResultUrl(null);
     setOriginalPreview(URL.createObjectURL(file));
+    setComparisonBeforeUrl(null);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Processing: ${file.name}`);
@@ -204,6 +206,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     }
     setResultUrl(null);
     setOriginalPreview(null);
+    setComparisonBeforeUrl(null);
     setPhase("scanning");
     setProgress(0);
     toast.info(`Generating colorized scene at ${latNum.toFixed(4)}°, ${lngNum.toFixed(4)}°`);
@@ -233,6 +236,7 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
 
       setProgress(100);
       setResultUrl(colorizedUrl);
+      setComparisonBeforeUrl(colorizedUrl);
       setPhase("complete");
       toast.success("Scene generated — saved to Gallery & Map!");
     } catch (e: any) {
@@ -443,13 +447,20 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                         <Check size={20} className="text-primary" />
                       </motion.div>
                       <p className="text-sm sm:text-base text-foreground/90 font-semibold text-center">Colorization Complete</p>
-                      {resultUrl && originalPreview && (
+                      {resultUrl && (originalPreview || comparisonBeforeUrl) && (
                         <div className="mt-4 sm:mt-5">
-                          <BeforeAfterSlider beforeSrc={originalPreview} afterSrc={resultUrl} aspect="aspect-square" />
+                          <BeforeAfterSlider
+                            beforeSrc={originalPreview || comparisonBeforeUrl || resultUrl}
+                            afterSrc={resultUrl}
+                            beforeLabel={originalPreview ? "Original" : "SAR Preview"}
+                            afterLabel="AI Colorized"
+                            beforeImageClassName={originalPreview ? "" : "grayscale contrast-125 brightness-90"}
+                            aspect="aspect-square"
+                          />
                           <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare</p>
                         </div>
                       )}
-                      {resultUrl && !originalPreview && (
+                      {resultUrl && !originalPreview && !comparisonBeforeUrl && (
                         <div className="mt-4 sm:mt-5 relative">
                           <img src={resultUrl} alt="Colorized" className="w-full aspect-square object-cover rounded-lg sm:rounded-xl border border-primary/40" />
                           <span className="absolute top-1.5 left-1.5 text-[9px] font-semibold bg-primary/80 text-white px-1.5 py-0.5 rounded-full">AI Colorized</span>

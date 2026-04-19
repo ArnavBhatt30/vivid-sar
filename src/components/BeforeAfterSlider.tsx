@@ -7,6 +7,7 @@ interface BeforeAfterSliderProps {
   afterLabel?: string;
   className?: string;
   aspect?: string;
+  beforeImageClassName?: string;
 }
 
 const BeforeAfterSlider = ({
@@ -16,6 +17,7 @@ const BeforeAfterSlider = ({
   afterLabel = "AI Colorized",
   className = "",
   aspect = "aspect-square",
+  beforeImageClassName = "",
 }: BeforeAfterSliderProps) => {
   const [position, setPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -56,7 +58,7 @@ const BeforeAfterSlider = ({
     >
       <img src={afterSrc} alt={afterLabel} className="absolute inset-0 w-full h-full object-cover" draggable={false} />
       <div className="absolute inset-0 overflow-hidden" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
-        <img src={beforeSrc} alt={beforeLabel} className="absolute inset-0 w-full h-full object-cover" draggable={false} />
+        <img src={beforeSrc} alt={beforeLabel} className={`absolute inset-0 w-full h-full object-cover ${beforeImageClassName}`} draggable={false} />
       </div>
 
       <div className="absolute top-0 bottom-0 w-px bg-foreground/40 pointer-events-none" style={{ left: `${position}%` }}>

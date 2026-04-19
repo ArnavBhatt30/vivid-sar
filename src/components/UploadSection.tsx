@@ -1,6 +1,6 @@
 import { useState, useRef, DragEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Check, Radar, MapPin, Globe, X, Plus, FileUp } from "lucide-react";
+import { Upload, Check, Radar, MapPin, Globe, X, Plus, FileUp, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";

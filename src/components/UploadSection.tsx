@@ -64,6 +64,8 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [batchMode, setBatchMode] = useState(false);
   const [batchQueue, setBatchQueue] = useState<QueueItem[]>([]);
+  const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [originalPreview, setOriginalPreview] = useState<string | null>(null);
   const progressTimerRef = useRef<ReturnType<typeof setInterval>>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const batchInputRef = useRef<HTMLInputElement>(null);

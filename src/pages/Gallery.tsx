@@ -53,6 +53,22 @@ const Gallery = () => {
 
   useEffect(() => { fetchItems(); }, [user]);
 
+  // Realtime: refresh when a new colorization is saved
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("gallery-items")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "colorizations", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          setItems((prev) => [payload.new as ColorItem, ...prev]);
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("colorizations").delete().eq("id", id);
     if (error) { toast.error("Failed to delete"); return; }

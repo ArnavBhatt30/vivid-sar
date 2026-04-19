@@ -8,6 +8,7 @@ interface BeforeAfterSliderProps {
   className?: string;
   aspect?: string;
   beforeImageClassName?: string;
+  zoom?: number;
 }
 
 const BeforeAfterSlider = ({

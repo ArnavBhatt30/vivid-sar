@@ -19,6 +19,7 @@ const BeforeAfterSlider = ({
   className = "",
   aspect = "aspect-square",
   beforeImageClassName = "",
+  zoom = 1,
 }: BeforeAfterSliderProps) => {
   const [position, setPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);

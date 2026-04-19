@@ -19,12 +19,46 @@ const COLORIZE_PROMPT =
   "bare soil as warm brown/tan, urban / built-up areas as light gray, water bodies as deep blue, sand as pale yellow. " +
   "Output only the colorized image, no text or borders.";
 
-const SYNTHESIZE_PROMPT = (lat: number, lng: number) =>
-  `Generate a realistic top-down colorized Sentinel-1 SAR-derived satellite image of the area at latitude ${lat.toFixed(
-    4,
-  )}, longitude ${lng.toFixed(4)}. ` +
-  "Render it as a square aerial view at ~10m/pixel resolution with naturalistic colors: vegetation in greens, water in blue, " +
-  "urban areas in light gray, soil in brown. Subtle radar speckle texture. No text, labels, borders, or UI.";
+const ENHANCE_PROMPT = (lat: number, lng: number) =>
+  `This is a real satellite tile of latitude ${lat.toFixed(4)}, longitude ${lng.toFixed(4)}. ` +
+  "Re-render it as a clean, naturally colorized Sentinel-1 SAR-derived RGB satellite view of the SAME EXACT area. " +
+  "Preserve every road, building footprint, field boundary, water body, and land feature in its EXACT position and shape. " +
+  "Do not invent, move, or remove any features. Use natural colors: vegetation greens, water deep blue, urban light gray, soil warm brown. " +
+  "Output only the image — no text, labels, borders, or UI.";
+
+// Convert lat/lng to XYZ tile coords (Web Mercator)
+function lngLatToTile(lng: number, lat: number, zoom: number) {
+  const n = Math.pow(2, zoom);
+  const x = Math.floor(((lng + 180) / 360) * n);
+  const latRad = (lat * Math.PI) / 180;
+  const y = Math.floor(
+    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n,
+  );
+  return { x, y };
+}
+
+// Fetch a real satellite tile from Esri World Imagery (no API key required)
+async function fetchSatelliteTile(lat: number, lng: number): Promise<{ b64: string; mime: string } | null> {
+  const zoom = 16; // ~2.4 m/pixel — high detail
+  const { x, y } = lngLatToTile(lng, lat, zoom);
+  const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error("Tile fetch failed:", res.status);
+      return null;
+    }
+    const buf = new Uint8Array(await res.arrayBuffer());
+    let bin = "";
+    for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+    const b64 = btoa(bin);
+    const mime = res.headers.get("content-type") || "image/jpeg";
+    return { b64, mime };
+  } catch (e) {
+    console.error("Tile fetch error:", e);
+    return null;
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });

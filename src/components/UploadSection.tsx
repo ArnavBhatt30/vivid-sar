@@ -145,6 +145,21 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
     return data as { imageBase64: string; mimeType: string };
   };
 
+  const fetchLandcover = async (b64: string, mt: string) => {
+    setBreakdownLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("landcover-analyze", {
+        body: { imageBase64: b64, mimeType: mt },
+      });
+      if (error) throw error;
+      if (data?.breakdown) setBreakdown(data.breakdown as Breakdown);
+    } catch (e) {
+      console.error("landcover failed", e);
+    } finally {
+      setBreakdownLoading(false);
+    }
+  };
+
   const uploadToStorage = async (blob: Blob, path: string) => {
     const { error } = await supabase.storage.from("sar-images").upload(path, blob, {
       contentType: blob.type,

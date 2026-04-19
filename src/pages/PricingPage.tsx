@@ -50,63 +50,63 @@ const PricingPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <section className="relative pt-32 pb-20 overflow-hidden">
+      <section className="relative pt-24 sm:pt-32 pb-12 sm:pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-grid" />
         <div className="absolute inset-0 bg-radial-hero" />
-        <div className="container mx-auto px-6 relative z-10">
+        <div className="container mx-auto px-5 sm:px-6 relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease }} className="max-w-3xl mx-auto text-center">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease }} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass mb-6">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4, ease }} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass mb-5 sm:mb-6">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              <span className="text-xs font-medium text-muted-foreground">14-day free trial on Pro</span>
+              <span className="text-[11px] sm:text-xs font-medium text-muted-foreground">14-day free trial on Pro</span>
             </motion.div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-[-0.04em] mb-6">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-[-0.04em] mb-4 sm:mb-6 leading-[1.05]">
               Simple, <span className="text-gradient-hero">transparent</span> pricing
             </h1>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">Start free, scale as you grow. No hidden fees, no surprises.</p>
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-xl mx-auto px-2 sm:px-0">Start free, scale as you grow. No hidden fees, no surprises.</p>
           </motion.div>
         </div>
       </section>
 
-      <section className="pb-20">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+      <section className="pb-16 sm:pb-20">
+        <div className="container mx-auto px-5 sm:px-6">
+          <div className="grid md:grid-cols-3 gap-4 sm:gap-5 max-w-5xl mx-auto">
             {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1, ease }}
-                className={`rounded-2xl p-7 relative transition-all duration-300 ${
+                className={`rounded-2xl p-5 sm:p-7 relative transition-all duration-300 ${
                   plan.featured
-                    ? "glass-elevated border border-primary/30 shadow-[0_0_40px_-10px_hsl(217_91%_60%_/_0.3)] scale-[1.02]"
+                    ? "glass-elevated border border-primary/30 shadow-[0_0_40px_-10px_hsl(217_91%_60%_/_0.3)] md:scale-[1.02]"
                     : "glass hover:border-border/40"
                 }`}
               >
                 {plan.featured && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground bg-primary px-4 py-1 rounded-full shadow-lg">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground bg-primary px-4 py-1 rounded-full shadow-lg whitespace-nowrap">
                     Most Popular
                   </span>
                 )}
 
-                <plan.icon size={22} className="text-primary mb-4" />
-                <h3 className="text-xl font-bold tracking-[-0.02em]">{plan.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1 mb-5">{plan.desc}</p>
+                <plan.icon size={22} className="text-primary mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-bold tracking-[-0.02em]">{plan.name}</h3>
+                <p className="text-xs text-muted-foreground mt-1 mb-4 sm:mb-5">{plan.desc}</p>
 
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-extrabold tracking-[-0.03em]">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.period}</span>
+                <div className="flex items-baseline gap-1 mb-5 sm:mb-6 flex-wrap">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-[-0.03em]">{plan.price}</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground">{plan.period}</span>
                 </div>
 
-                <Button variant={plan.featured ? "glow" : "outline"} className="w-full mb-6 group">
+                <Button variant={plan.featured ? "glow" : "outline"} className="w-full mb-5 sm:mb-6 group">
                   {plan.cta}
                   <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
                 </Button>
 
-                <ul className="space-y-3">
+                <ul className="space-y-2.5 sm:space-y-3">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-xs text-muted-foreground">
+                    <li key={f} className="flex items-start gap-2.5 text-xs sm:text-[13px] text-muted-foreground">
                       <Check size={14} className="text-primary shrink-0 mt-0.5" />
-                      {f}
+                      <span className="break-words min-w-0">{f}</span>
                     </li>
                   ))}
                 </ul>

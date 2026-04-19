@@ -83,7 +83,19 @@ Deno.serve(async (req) => {
         { type: "image_url", image_url: { url: `data:${mt};base64,${imageBase64}` } },
       ];
     } else if (typeof lat === "number" && typeof lng === "number") {
-      userContent = [{ type: "text", text: SYNTHESIZE_PROMPT(lat, lng) }];
+      // Fetch a REAL satellite tile of these coordinates and ask the AI to re-render
+      // it in the SAR-colorized style — preserving the actual ground features.
+      const tile = await fetchSatelliteTile(lat, lng);
+      if (!tile) {
+        return new Response(
+          JSON.stringify({ error: "Could not fetch satellite imagery for those coordinates" }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      userContent = [
+        { type: "text", text: ENHANCE_PROMPT(lat, lng) },
+        { type: "image_url", image_url: { url: `data:${tile.mime};base64,${tile.b64}` } },
+      ];
     } else {
       return new Response(
         JSON.stringify({ error: "Provide imageBase64 or { lat, lng }" }),

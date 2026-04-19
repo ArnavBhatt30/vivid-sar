@@ -477,27 +477,29 @@ const UploadSection = ({ embedded }: UploadSectionProps) => {
                       </motion.div>
                       <p className="text-sm sm:text-base text-foreground/90 font-semibold text-center">Colorization Complete</p>
                       {resultUrl && (originalPreview || comparisonBeforeUrl) && (
-                        <div className="mt-4 sm:mt-5 relative">
-                          <BeforeAfterSlider
-                            beforeSrc={originalPreview || comparisonBeforeUrl || resultUrl}
-                            afterSrc={resultUrl}
-                            beforeLabel={originalPreview ? "Original" : "SAR Preview"}
-                            afterLabel="AI Colorized"
-                            beforeImageClassName={originalPreview ? "" : "grayscale contrast-125 brightness-90"}
-                            aspect="aspect-square"
-                            zoom={zoomLevel}
-                          />
-                          <div className="absolute bottom-2 right-2 flex items-center gap-1 glass-elevated rounded-full p-1 z-10">
-                            {([1, 2, 3, 4] as const).map((z) => (
-                              <button
-                                key={z}
-                                onClick={(e) => { e.stopPropagation(); setZoomLevel(z); }}
-                                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors ${zoomLevel === z ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                                title={`Zoom ${z}x`}
-                              >
-                                {z}×
-                              </button>
-                            ))}
+                        <div className="mt-4 sm:mt-5">
+                          <div className="relative">
+                            <BeforeAfterSlider
+                              beforeSrc={originalPreview || comparisonBeforeUrl || resultUrl}
+                              afterSrc={resultUrl}
+                              beforeLabel={originalPreview ? "Original" : "SAR Preview"}
+                              afterLabel="AI Colorized"
+                              beforeImageClassName={originalPreview ? "" : "grayscale contrast-125 brightness-90"}
+                              aspect="aspect-square"
+                              zoom={zoomLevel}
+                            />
+                            <div className="absolute bottom-2 right-2 flex items-center gap-0.5 glass-elevated rounded-full p-1 z-10">
+                              {([1, 2, 3, 4] as const).map((z) => (
+                                <button
+                                  key={z}
+                                  onClick={(e) => { e.stopPropagation(); setZoomLevel(z); }}
+                                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full transition-colors ${zoomLevel === z ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                                  title={`Zoom ${z}x`}
+                                >
+                                  {z}×
+                                </button>
+                              ))}
+                            </div>
                           </div>
                           <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Drag to compare • {zoomLevel}× zoom</p>
                           <LandCoverBar breakdown={breakdown} loading={breakdownLoading} />
